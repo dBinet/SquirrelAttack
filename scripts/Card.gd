@@ -3,11 +3,34 @@ extends Node2D
 var card_name: String = ""
 var value: int = 1
 
+var sprite: Sprite2D
+var size := Vector2(100, 150)
+var original_position: Vector2
+var is_dragging := false
+var drag_offset := Vector2.ZERO
+
 func _ready():
-    var sprite := Sprite2D.new()
+    original_position = position
+    sprite = Sprite2D.new()
     sprite.texture = _create_card_texture()
     sprite.centered = true
     add_child(sprite)
+
+func _input(event):
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+        var mouse_pos = get_global_mouse_position()
+        var rect = Rect2(position - size / 2, size)
+        if event.pressed and !is_dragging:
+            if rect.has_point(mouse_pos):
+                is_dragging = true
+                drag_offset = position - mouse_pos
+        elif !event.pressed and is_dragging:
+            is_dragging = false
+            position = original_position
+
+func _process(delta):
+    if is_dragging:
+        position = get_global_mouse_position() + drag_offset
 
 func _create_card_texture() -> ImageTexture:
     var width := 100
@@ -24,4 +47,5 @@ func _create_card_texture() -> ImageTexture:
 
     var tex := ImageTexture.create_from_image(img)
     return tex
+
 
