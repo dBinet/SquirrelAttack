@@ -1,1 +1,14 @@
-"# SquirrelAttack" 
+# SquirrelAttack
+
+This repository contains a minimal Godot project for a simple 2D card game prototype.
+
+## Project Structure
+- `project.godot` – Godot project configuration.
+- `scenes/` – Godot scene files including the main scene and a basic card scene.
+- `scripts/` – GDScript files for the main scene and card logic.
+
+## Getting Started
+1. Open the folder in Godot 4.x.
+2. Run the project to see the empty scene.
+
+The project is intentionally minimal and can be extended with gameplay and assets.
