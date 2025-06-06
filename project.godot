@@ -1,0 +1,8 @@
+; Engine configuration file.
+; It's best edited using the editor.
+
+config_version=5
+
+[application]
+config/name="Squirrel Card Game"
+run/main_scene="res://scenes/Main.tscn"
