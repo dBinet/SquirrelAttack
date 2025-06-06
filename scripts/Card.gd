@@ -4,21 +4,26 @@ var card_name: String = ""
 var value: int = 1
 
 func _ready():
-    var color_rect := ColorRect.new()
-    color_rect.color = Color(1, 1, 1)
-    color_rect.custom_minimum_size = Vector2(100, 150)
-    add_child(color_rect)
+    var sprite := Sprite2D.new()
+    sprite.texture = _create_card_texture()
+    sprite.centered = true
+    add_child(sprite)
 
-    var label := Label.new()
-    label.text = str(value)
-    label.anchor_left = 0
-    label.anchor_top = 0
-    label.anchor_right = 1
-    label.anchor_bottom = 1
-    label.offset_left = 0
-    label.offset_top = 0
-    label.offset_right = 0
-    label.offset_bottom = 0
-    label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-    color_rect.add_child(label)
+func _create_card_texture() -> ImageTexture:
+    var width := 100
+    var height := 150
+    var img := Image.create(width, height, false, Image.FORMAT_RGBA8)
+    img.fill(Color(1, 1, 1, 1))
+    img.lock()
+    var black := Color(0, 0, 0, 1)
+
+    for y in range(30, height - 20):
+        img.set_pixel(width / 2, y, black)
+
+    for x in range(width / 2 - 10, width / 2 + 10):
+        img.set_pixel(x, 30, black)
+
+    img.unlock()
+    var tex := ImageTexture.create_from_image(img)
+    return tex
+
