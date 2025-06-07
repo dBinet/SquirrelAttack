@@ -53,8 +53,8 @@ func try_place_piece(card) -> bool:
     var indices: Array[Vector2i] = []
     for pos in positions:
         var local := to_local(pos)
-        var ix := int(floor(local.x / CELL_SIZE))
-        var iy := int(floor(local.y / CELL_SIZE))
+        var ix := int(round(local.x / CELL_SIZE))
+        var iy := int(round(local.y / CELL_SIZE))
         if ix < 0 or ix >= COLS or iy < 0 or iy >= ROWS:
             return false
         if cells[ix][iy]:
@@ -73,8 +73,8 @@ func preview_piece(card) -> void:
     var positions: Array[Vector2] = card.get_global_block_positions()
     for pos in positions:
         var local := to_local(pos)
-        var ix := int(floor(local.x / CELL_SIZE))
-        var iy := int(floor(local.y / CELL_SIZE))
+        var ix := int(round(local.x / CELL_SIZE))
+        var iy := int(round(local.y / CELL_SIZE))
         if ix < 0 or ix >= COLS or iy < 0 or iy >= ROWS:
             queue_redraw()
             return
