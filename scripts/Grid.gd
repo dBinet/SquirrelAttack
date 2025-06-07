@@ -36,6 +36,8 @@ func _draw():
     for x in range(COLS + 1):
         draw_line(Vector2(x * CELL_SIZE, 0), Vector2(x * CELL_SIZE, height), line_color)
     for y in range(ROWS + 1):
+        if y == 0 or y >= ROWS - 2:
+            continue
         draw_line(Vector2(0, y * CELL_SIZE), Vector2(width, y * CELL_SIZE), line_color)
     var fill_color := Color(0, 0, 0)
     for x in range(COLS):
