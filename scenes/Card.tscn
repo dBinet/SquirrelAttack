@@ -3,5 +3,6 @@
 [ext_resource type="Script" path="res://scripts/Card.gd" id="1"]
 
 [node name="Card" type="Node2D"]
+groups=["Cards"]
 
 script = ExtResource("1")
