@@ -66,6 +66,9 @@ func _input(event):
                         return
                 _transform_to_card()
             position = original_position
+            var parent = get_parent()
+            if parent and parent.has_method("clear_previews"):
+                parent.clear_previews()
 
 func _process(delta):
     if is_dragging:
@@ -73,10 +76,6 @@ func _process(delta):
         var parent = get_parent()
         if parent and parent.has_method("preview_card_drag"):
             parent.preview_card_drag(self)
-    else:
-        var parent = get_parent()
-        if parent and parent.has_method("clear_previews"):
-            parent.clear_previews()
 
 func _update_textures():
     var shape_blocks: Array = SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
