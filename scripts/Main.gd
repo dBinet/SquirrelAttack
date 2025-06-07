@@ -11,7 +11,7 @@ func _ready():
         add_child(card)
         card.position = Vector2(
             spacing * (i + 1),
-            viewport_size.y * 2.0 / 3.0
+            viewport_size.y * 5.0 / 6.0
         )
         card.set_original_position()
 
