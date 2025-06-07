@@ -5,4 +5,5 @@ func _ready():
     var card := card_scene.instantiate()
     add_child(card)
     card.position = get_viewport_rect().size / 2
+    card.set_original_position()
 

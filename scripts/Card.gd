@@ -16,6 +16,9 @@ func _ready():
     sprite.centered = true
     add_child(sprite)
 
+func set_original_position():
+    original_position = position
+
 func _input(event):
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
         var mouse_pos = get_global_mouse_position()
@@ -24,6 +27,7 @@ func _input(event):
             if rect.has_point(mouse_pos):
                 is_dragging = true
                 drag_offset = position - mouse_pos
+                original_position = position
         elif !event.pressed and is_dragging:
             is_dragging = false
             position = original_position
