@@ -3,15 +3,22 @@ extends Node2D
 var _cards: Array[Card] = []
 var _previous_viewport_size := Vector2.ZERO
 
+const SHAPES := ["I", "L", "O", "T", "S", "Z"]
+
 func _ready():
     var card_scene := preload("res://scenes/Card.tscn")
     _previous_viewport_size = get_viewport_rect().size
     var viewport_size := _previous_viewport_size
-    var num_cards := 5
+
+    var available := SHAPES.duplicate()
+    available.shuffle()
+    var selected := available.slice(0, 5)
+    var num_cards := selected.size()
     var spacing := viewport_size.x / (num_cards + 1)
 
     for i in range(num_cards):
         var card := card_scene.instantiate()
+        card.shape_name = selected[i]
         add_child(card)
         _cards.append(card)
         var bottom_y: float = viewport_size.y - card.size.y / 2.0 - 10.0
