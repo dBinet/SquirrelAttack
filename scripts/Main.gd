@@ -12,18 +12,16 @@ const GRID_VERTICAL_OFFSET := 50.0
 const GRID_VERTICAL_SCALE := 0.9
 
 func _ready():
+    randomize()
     _previous_viewport_size = get_viewport_rect().size
     _grids = [get_node("LeftGrid"), get_node("RightGrid")]
     for g in _grids:
         g.scale = Vector2(1.0, GRID_VERTICAL_SCALE)
-    
-    var available := SHAPES.duplicate()
-    available.shuffle()
-    var selected := available.slice(0, 5)
 
-    for shape in selected:
+    for i in range(5):
+        var shape_idx := randi_range(0, SHAPES.size() - 1)
         var card := CARD_SCENE.instantiate()
-        card.shape_name = shape
+        card.shape_name = SHAPES[shape_idx]
         add_child(card)
         _cards.append(card)
 
