@@ -1,6 +1,6 @@
 extends Node2D
 
-var _cards := []
+var _cards: Array[Card] = []
 var _previous_viewport_size := Vector2.ZERO
 
 func _ready():
