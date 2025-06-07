@@ -64,7 +64,7 @@ func _process(delta):
         position = get_global_mouse_position() + drag_offset
 
 func _update_textures():
-    var shape_blocks := SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
+    var shape_blocks: Array = SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
     var blocks: Array[Vector2] = []
     blocks.assign(shape_blocks)
     card_texture = _create_card_texture(blocks)
