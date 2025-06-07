@@ -3,6 +3,7 @@ extends Node2D
 var _cards: Array[Card] = []
 var _previous_viewport_size := Vector2.ZERO
 var _grids: Array[Grid] = []
+var _end_button: Button
 
 const SHAPES := ["I", "L", "O", "T", "S", "Z"]
 const CARD_SCENE := preload("res://scenes/Card.tscn")
@@ -18,12 +19,14 @@ func _ready():
     for g in _grids:
         g.scale = Vector2(1.0, GRID_VERTICAL_SCALE)
 
-    for i in range(5):
-        var shape_idx := randi_range(0, SHAPES.size() - 1)
-        var card := CARD_SCENE.instantiate()
-        card.shape_name = SHAPES[shape_idx]
-        add_child(card)
-        _cards.append(card)
+    _end_button = get_node_or_null("EndTurnButton")
+    if _end_button:
+        _end_button.text = "End Turn"
+        _end_button.custom_minimum_size = Vector2(100, 30)
+        _end_button.position = Vector2(10, 10)
+        _end_button.pressed.connect(_on_EndTurnButton_pressed)
+
+    _add_random_cards()
 
     _update_scale()
     _update_card_positions()
@@ -90,4 +93,23 @@ func preview_card_drag(card: Card) -> void:
 func clear_previews() -> void:
     for grid in _grids:
         grid.clear_preview()
+
+func _discard_remaining_cards() -> void:
+    for card in _cards:
+        card.queue_free()
+    _cards.clear()
+
+func _add_random_cards(num: int = 5) -> void:
+    for i in range(num):
+        var shape_idx := randi_range(0, SHAPES.size() - 1)
+        var card := CARD_SCENE.instantiate()
+        card.shape_name = SHAPES[shape_idx]
+        add_child(card)
+        _cards.append(card)
+
+func _on_EndTurnButton_pressed() -> void:
+    _discard_remaining_cards()
+    _add_random_cards()
+    _update_card_positions()
+    clear_previews()
 
