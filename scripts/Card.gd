@@ -19,12 +19,12 @@ var drag_offset := Vector2.ZERO
 
 const BLOCK_SIZE := 20
 const SHAPE_DATA := {
-    "I": [Vector2(0,0), Vector2(1,0), Vector2(2,0), Vector2(3,0)] as Array[Vector2],
-    "L": [Vector2(0,0), Vector2(0,1), Vector2(0,2), Vector2(1,2)] as Array[Vector2],
-    "O": [Vector2(0,0), Vector2(1,0), Vector2(0,1), Vector2(1,1)] as Array[Vector2],
-    "T": [Vector2(1,0), Vector2(0,1), Vector2(1,1), Vector2(2,1)] as Array[Vector2],
-    "S": [Vector2(1,0), Vector2(2,0), Vector2(0,1), Vector2(1,1)] as Array[Vector2],
-    "Z": [Vector2(0,0), Vector2(1,0), Vector2(1,1), Vector2(2,1)] as Array[Vector2]
+    "I": [Vector2(0,0), Vector2(1,0), Vector2(2,0), Vector2(3,0)],
+    "L": [Vector2(0,0), Vector2(0,1), Vector2(0,2), Vector2(1,2)],
+    "O": [Vector2(0,0), Vector2(1,0), Vector2(0,1), Vector2(1,1)],
+    "T": [Vector2(1,0), Vector2(0,1), Vector2(1,1), Vector2(2,1)],
+    "S": [Vector2(1,0), Vector2(2,0), Vector2(0,1), Vector2(1,1)],
+    "Z": [Vector2(0,0), Vector2(1,0), Vector2(1,1), Vector2(2,1)]
 }
 
 func _ready():
