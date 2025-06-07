@@ -8,10 +8,27 @@ var value: int = 1
 var shape_name: String = "L"
 
 var sprite: Sprite2D
-const CARD_WIDTH := 100
-const CARD_HEIGHT := 150
-const CARD_SIZE := Vector2(CARD_WIDTH, CARD_HEIGHT)
-var size := CARD_SIZE
+
+# Base sizes used prior to scaling
+const BASE_CARD_WIDTH := 100
+const BASE_CARD_HEIGHT := 150
+const BASE_BLOCK_SIZE := 20
+
+# Actual sizes updated when the viewport changes
+static var card_width := BASE_CARD_WIDTH
+static var card_height := BASE_CARD_HEIGHT
+static var block_size := BASE_BLOCK_SIZE
+
+static func update_scale(new_cell_size: float) -> void:
+    block_size = new_cell_size
+    var scale := new_cell_size / BASE_BLOCK_SIZE
+    card_width = int(BASE_CARD_WIDTH * scale)
+    card_height = int(BASE_CARD_HEIGHT * scale)
+    for c in get_tree().get_nodes_in_group("Cards"):
+        if c is Card:
+            c._update_textures()
+
+var size := Vector2(card_width, card_height)
 var card_texture: ImageTexture
 var piece_texture: ImageTexture
 var piece_size: Vector2
@@ -20,8 +37,6 @@ var original_position: Vector2
 var is_dragging := false
 var drag_offset := Vector2.ZERO
 var shape_bounds := Rect2()
-
-const BLOCK_SIZE := 20
 ## Dictionary containing the coordinates for each tetromino.
 # Using `var` instead of `const` avoids the constant-expression error when
 # running on versions of Godot that do not treat `Vector2` constructors as
@@ -84,41 +99,42 @@ func _update_textures():
     shape_bounds = _get_shape_bounds(blocks)
     card_texture = _create_card_texture(blocks)
     piece_texture = _create_piece_texture(blocks)
+    size = Vector2(card_width, card_height)
 
 func _create_card_texture(blocks: Array[Vector2]) -> ImageTexture:
-    var width := CARD_WIDTH
-    var height := CARD_HEIGHT
+    var width := card_width
+    var height := card_height
     var img := Image.create(width, height, false, Image.FORMAT_RGBA8)
     img.fill(Color(1, 1, 1, 1))
     var black := Color(0, 0, 0, 1)
 
     var bounds := _get_shape_bounds(blocks)
-    var shape_w := int(bounds.size.x) * BLOCK_SIZE
-    var shape_h := int(bounds.size.y) * BLOCK_SIZE
-    var start_x := int((width - shape_w) / 2) - int(bounds.position.x) * BLOCK_SIZE
-    var start_y := int((height - shape_h) / 2) - int(bounds.position.y) * BLOCK_SIZE
+    var shape_w := int(bounds.size.x) * block_size
+    var shape_h := int(bounds.size.y) * block_size
+    var start_x := int((width - shape_w) / 2) - int(bounds.position.x) * block_size
+    var start_y := int((height - shape_h) / 2) - int(bounds.position.y) * block_size
 
     for block in blocks:
-        for x in range(BLOCK_SIZE):
-            for y in range(BLOCK_SIZE):
-                var px: int = start_x + int(block.x) * BLOCK_SIZE + x
-                var py: int = start_y + int(block.y) * BLOCK_SIZE + y
+        for x in range(block_size):
+            for y in range(block_size):
+                var px: int = start_x + int(block.x) * block_size + x
+                var py: int = start_y + int(block.y) * block_size + y
                 img.set_pixel(px, py, black)
 
     return ImageTexture.create_from_image(img)
 
 func _create_piece_texture(blocks: Array[Vector2]) -> ImageTexture:
     var bounds := _get_shape_bounds(blocks)
-    var width := int(bounds.size.x) * BLOCK_SIZE
-    var height := int(bounds.size.y) * BLOCK_SIZE
+    var width := int(bounds.size.x) * block_size
+    var height := int(bounds.size.y) * block_size
     var img := Image.create(width, height, false, Image.FORMAT_RGBA8)
     img.fill(Color(0, 0, 0, 0))
     var black := Color(0, 0, 0, 1)
     for block in blocks:
-        for x in range(BLOCK_SIZE):
-            for y in range(BLOCK_SIZE):
-                var px: int = (int(block.x) - int(bounds.position.x)) * BLOCK_SIZE + x
-                var py: int = (int(block.y) - int(bounds.position.y)) * BLOCK_SIZE + y
+        for x in range(block_size):
+            for y in range(block_size):
+                var px: int = (int(block.x) - int(bounds.position.x)) * block_size + x
+                var py: int = (int(block.y) - int(bounds.position.y)) * block_size + y
                 img.set_pixel(px, py, black)
     piece_size = Vector2(width, height)
     return ImageTexture.create_from_image(img)
@@ -143,7 +159,7 @@ func _transform_to_piece():
 
 func _transform_to_card():
     sprite.texture = card_texture
-    size = CARD_SIZE
+    size = Vector2(card_width, card_height)
     is_transformed = false
     sprite.modulate = Color(1, 1, 1, 1)
 
@@ -156,8 +172,8 @@ func get_global_block_positions() -> Array[Vector2]:
     var top_left := position - size / 2.0
     var positions: Array[Vector2] = []
     for b in blocks:
-        var px: float = top_left.x + (b.x - shape_bounds.position.x) * BLOCK_SIZE
-        var py: float = top_left.y + (b.y - shape_bounds.position.y) * BLOCK_SIZE
+        var px: float = top_left.x + (b.x - shape_bounds.position.x) * block_size
+        var py: float = top_left.y + (b.y - shape_bounds.position.y) * block_size
         positions.append(Vector2(px, py))
     return positions
 

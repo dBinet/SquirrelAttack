@@ -3,7 +3,19 @@ class_name Grid
 
 const COLS := 10
 const ROWS := 20
-const CELL_SIZE := 20
+# Base cell size used to compute scaling
+const BASE_CELL_SIZE := 20
+
+# Actual cell size used for drawing. Updated by `Main.gd` when the
+# viewport changes to keep the grids relative to the screen size.
+static var CELL_SIZE := BASE_CELL_SIZE
+
+static func set_cell_size(new_size: float) -> void:
+    CELL_SIZE = new_size
+    # Redraw all existing grid instances when the cell size changes
+    for grid in get_tree().get_nodes_in_group("GridInstances"):
+        if grid is Grid:
+            grid.queue_redraw()
 
 var cells: Array = []
 var preview_cells: Array[Vector2i] = []

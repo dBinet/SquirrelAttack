@@ -13,8 +13,7 @@ const GRID_VERTICAL_OFFSET := 50.0
 func _ready():
     _previous_viewport_size = get_viewport_rect().size
     _grids = [get_node("LeftGrid"), get_node("RightGrid")]
-    _position_grids()
-
+    
     var available := SHAPES.duplicate()
     available.shuffle()
     var selected := available.slice(0, 5)
@@ -25,12 +24,15 @@ func _ready():
         add_child(card)
         _cards.append(card)
 
+    _update_scale()
     _update_card_positions()
+    _position_grids()
 
 func _process(delta):
     var current_size := get_viewport_rect().size
     if current_size != _previous_viewport_size:
         _previous_viewport_size = current_size
+        _update_scale()
         _update_card_positions()
         _position_grids()
 
@@ -55,6 +57,16 @@ func _position_grids():
     var top_y := (viewport_size.y - grid_height) / 2.0 - GRID_VERTICAL_OFFSET
     _grids[0].position = Vector2(start_x, top_y)
     _grids[1].position = Vector2(start_x + grid_width + GRID_MARGIN, top_y)
+
+func _update_scale():
+    var viewport_size := _previous_viewport_size
+    var horiz := (viewport_size.x - GRID_MARGIN) / (Grid.COLS * 2)
+    var vert := (viewport_size.y - GRID_VERTICAL_OFFSET * 2) / Grid.ROWS
+    var new_size := floor(min(horiz, vert))
+    if new_size <= 0:
+        new_size = 1
+    Grid.set_cell_size(new_size)
+    Card.update_scale(new_size)
 
 func on_card_dropped(card: Card) -> bool:
     for grid in _grids:
