@@ -31,14 +31,11 @@ func _ready():
 
 func _draw():
     var width := COLS * CELL_SIZE
-    # Stop vertical lines at the last horizontal line
-    var height := (ROWS - 3) * CELL_SIZE
+    var height := ROWS * CELL_SIZE
     var line_color := Color(0.7, 0.7, 0.7)
     for x in range(COLS + 1):
         draw_line(Vector2(x * CELL_SIZE, 0), Vector2(x * CELL_SIZE, height), line_color)
     for y in range(ROWS + 1):
-        if y == 0 or y >= ROWS - 2:
-            continue
         draw_line(Vector2(0, y * CELL_SIZE), Vector2(width, y * CELL_SIZE), line_color)
     var fill_color := Color(0, 0, 0)
     for x in range(COLS):
