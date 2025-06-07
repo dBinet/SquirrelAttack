@@ -48,11 +48,11 @@ func _position_grids():
         return
     var viewport_size := _previous_viewport_size
     var grid_width := Grid.COLS * Grid.CELL_SIZE
+    var pair_width := grid_width * 2 + GRID_MARGIN
+    var start_x := (viewport_size.x - pair_width) / 2.0
     var top_y := GRID_MARGIN
-    var left_x := GRID_MARGIN
-    _grids[0].position = Vector2(left_x, top_y)
-    var right_x := viewport_size.x - grid_width - GRID_MARGIN
-    _grids[1].position = Vector2(right_x, top_y)
+    _grids[0].position = Vector2(start_x, top_y)
+    _grids[1].position = Vector2(start_x + grid_width + GRID_MARGIN, top_y)
 
 func on_card_dropped(card: Card) -> bool:
     for grid in _grids:
