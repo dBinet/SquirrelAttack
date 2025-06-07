@@ -44,11 +44,22 @@ func _create_card_texture() -> ImageTexture:
     img.fill(Color(1, 1, 1, 1))
     var black := Color(0, 0, 0, 1)
 
-    for y in range(30, height - 20):
-        img.set_pixel(width / 2, y, black)
+    var block_size := 20
+    var start_x := int((width - block_size * 2) / 2)
+    var start_y := int((height - block_size * 3) / 2)
+    var blocks := [
+        Vector2(0, 0),
+        Vector2(0, 1),
+        Vector2(0, 2),
+        Vector2(1, 2)
+    ]
 
-    for x in range(width / 2 - 10, width / 2 + 10):
-        img.set_pixel(x, 30, black)
+    for block in blocks:
+        for x in range(block_size):
+            for y in range(block_size):
+                var px := start_x + block.x * block_size + x
+                var py := start_y + block.y * block_size + y
+                img.set_pixel(px, py, black)
 
     var tex := ImageTexture.create_from_image(img)
     return tex
