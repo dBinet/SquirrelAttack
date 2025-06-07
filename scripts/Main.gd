@@ -4,29 +4,23 @@ var _cards: Array[Card] = []
 var _previous_viewport_size := Vector2.ZERO
 
 const SHAPES := ["I", "L", "O", "T", "S", "Z"]
+const CARD_SCENE := preload("res://scenes/Card.tscn")
+const BOTTOM_MARGIN := 10.0
 
 func _ready():
-    var card_scene := preload("res://scenes/Card.tscn")
     _previous_viewport_size = get_viewport_rect().size
-    var viewport_size := _previous_viewport_size
 
     var available := SHAPES.duplicate()
     available.shuffle()
     var selected := available.slice(0, 5)
-    var num_cards := selected.size()
-    var spacing := viewport_size.x / (num_cards + 1)
 
-    for i in range(num_cards):
-        var card := card_scene.instantiate()
-        card.shape_name = selected[i]
+    for shape in selected:
+        var card := CARD_SCENE.instantiate()
+        card.shape_name = shape
         add_child(card)
         _cards.append(card)
-        var bottom_y: float = viewport_size.y - card.size.y / 2.0 - 10.0
-        card.position = Vector2(
-            spacing * (i + 1),
-            bottom_y
-        )
-        card.set_original_position()
+
+    _update_card_positions()
 
 func _process(delta):
     var current_size := get_viewport_rect().size
@@ -40,10 +34,7 @@ func _update_card_positions():
     var spacing := viewport_size.x / (num_cards + 1)
     for i in range(num_cards):
         var card := _cards[i]
-        var bottom_y: float = viewport_size.y - card.size.y / 2.0 - 10.0
-        card.position = Vector2(
-            spacing * (i + 1),
-            bottom_y
-        )
+        var bottom_y: float = viewport_size.y - card.size.y / 2.0 - BOTTOM_MARGIN
+        card.position = Vector2(spacing * (i + 1), bottom_y)
         card.set_original_position()
 

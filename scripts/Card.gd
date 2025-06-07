@@ -8,7 +8,10 @@ var value: int = 1
 var shape_name: String = "L"
 
 var sprite: Sprite2D
-var size := Vector2(100, 150)
+const CARD_WIDTH := 100
+const CARD_HEIGHT := 150
+const CARD_SIZE := Vector2(CARD_WIDTH, CARD_HEIGHT)
+var size := CARD_SIZE
 var card_texture: ImageTexture
 var piece_texture: ImageTexture
 var piece_size: Vector2
@@ -71,8 +74,8 @@ func _update_textures():
     piece_texture = _create_piece_texture(blocks)
 
 func _create_card_texture(blocks: Array[Vector2]) -> ImageTexture:
-    var width := 100
-    var height := 150
+    var width := CARD_WIDTH
+    var height := CARD_HEIGHT
     var img := Image.create(width, height, false, Image.FORMAT_RGBA8)
     img.fill(Color(1, 1, 1, 1))
     var black := Color(0, 0, 0, 1)
@@ -127,7 +130,7 @@ func _transform_to_piece():
 
 func _transform_to_card():
     sprite.texture = card_texture
-    size = Vector2(100, 150)
+    size = CARD_SIZE
     is_transformed = false
 
 func _is_in_bottom_third() -> bool:
