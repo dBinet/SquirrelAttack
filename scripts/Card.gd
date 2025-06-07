@@ -140,11 +140,13 @@ func _transform_to_piece():
     sprite.texture = piece_texture
     size = piece_size
     is_transformed = true
+    sprite.modulate = Color(1, 1, 1, 0.5)
 
 func _transform_to_card():
     sprite.texture = card_texture
     size = CARD_SIZE
     is_transformed = false
+    sprite.modulate = Color(1, 1, 1, 1)
 
 func _is_in_bottom_third() -> bool:
     var viewport_size := get_viewport_rect().size
