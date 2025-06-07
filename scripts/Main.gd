@@ -9,10 +9,13 @@ const CARD_SCENE := preload("res://scenes/Card.tscn")
 const BOTTOM_MARGIN := 10.0
 const GRID_MARGIN := 20.0
 const GRID_VERTICAL_OFFSET := 50.0
+const GRID_VERTICAL_SCALE := 0.9
 
 func _ready():
     _previous_viewport_size = get_viewport_rect().size
     _grids = [get_node("LeftGrid"), get_node("RightGrid")]
+    for g in _grids:
+        g.scale = Vector2(1.0, GRID_VERTICAL_SCALE)
     
     var available := SHAPES.duplicate()
     available.shuffle()
@@ -53,7 +56,7 @@ func _position_grids():
         return
     var viewport_size := _previous_viewport_size
     var grid_width := Grid.COLS * Grid.CELL_SIZE
-    var grid_height := Grid.ROWS * Grid.CELL_SIZE
+    var grid_height := Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
     var pair_width := grid_width * 2 + GRID_MARGIN
     var start_x := (viewport_size.x - pair_width) / 2.0
     var top_y := (viewport_size.y - grid_height) / 2.0 - GRID_VERTICAL_OFFSET
