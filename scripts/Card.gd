@@ -1,4 +1,5 @@
 extends Node2D
+class_name Card
 
 var card_name: String = ""
 var value: int = 1
