@@ -42,6 +42,8 @@ func _update_card_positions():
     var spacing := viewport_size.x / (num_cards + 1)
     for i in range(num_cards):
         var card := _cards[i]
+        if card.is_dragging:
+            continue
         var bottom_y: float = viewport_size.y - card.size.y / 2.0 - BOTTOM_MARGIN
         card.position = Vector2(spacing * (i + 1), bottom_y)
         card.set_original_position()
