@@ -14,7 +14,7 @@ func _ready():
         var card := card_scene.instantiate()
         add_child(card)
         _cards.append(card)
-        var bottom_y := viewport_size.y - card.size.y / 2 - 10
+        var bottom_y: float = viewport_size.y - card.size.y / 2.0 - 10.0
         card.position = Vector2(
             spacing * (i + 1),
             bottom_y
@@ -33,7 +33,7 @@ func _update_card_positions():
     var spacing := viewport_size.x / (num_cards + 1)
     for i in range(num_cards):
         var card := _cards[i]
-        var bottom_y := viewport_size.y - card.size.y / 2 - 10
+        var bottom_y: float = viewport_size.y - card.size.y / 2.0 - 10.0
         card.position = Vector2(
             spacing * (i + 1),
             bottom_y
