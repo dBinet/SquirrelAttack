@@ -18,7 +18,11 @@ var is_dragging := false
 var drag_offset := Vector2.ZERO
 
 const BLOCK_SIZE := 20
-const SHAPE_DATA := {
+## Dictionary containing the coordinates for each tetromino.
+# Using `var` instead of `const` avoids the constant-expression error when
+# running on versions of Godot that do not treat `Vector2` constructors as
+# compile-time constants.
+var SHAPE_DATA := {
     "I": [Vector2(0,0), Vector2(1,0), Vector2(2,0), Vector2(3,0)],
     "L": [Vector2(0,0), Vector2(0,1), Vector2(0,2), Vector2(1,2)],
     "O": [Vector2(0,0), Vector2(1,0), Vector2(0,1), Vector2(1,1)],
