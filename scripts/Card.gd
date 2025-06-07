@@ -19,6 +19,7 @@ var is_transformed := false
 var original_position: Vector2
 var is_dragging := false
 var drag_offset := Vector2.ZERO
+var shape_bounds := Rect2()
 
 const BLOCK_SIZE := 20
 ## Dictionary containing the coordinates for each tetromino.
@@ -58,9 +59,13 @@ func _input(event):
                     _transform_to_piece()
         elif !event.pressed and is_dragging:
             is_dragging = false
-            position = original_position
             if is_transformed:
+                var parent = get_parent()
+                if parent and parent.has_method("on_card_dropped"):
+                    if parent.on_card_dropped(self):
+                        return
                 _transform_to_card()
+            position = original_position
 
 func _process(delta):
     if is_dragging:
@@ -70,6 +75,7 @@ func _update_textures():
     var shape_blocks: Array = SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
     var blocks: Array[Vector2] = []
     blocks.assign(shape_blocks)
+    shape_bounds = _get_shape_bounds(blocks)
     card_texture = _create_card_texture(blocks)
     piece_texture = _create_piece_texture(blocks)
 
@@ -136,4 +142,14 @@ func _transform_to_card():
 func _is_in_bottom_third() -> bool:
     var viewport_size := get_viewport_rect().size
     return original_position.y > viewport_size.y * 2.0 / 3.0
+
+func get_global_block_positions() -> Array[Vector2]:
+    var blocks: Array = SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
+    var top_left := position - size / 2.0
+    var positions: Array[Vector2] = []
+    for b in blocks:
+        var px := top_left.x + (b.x - shape_bounds.position.x) * BLOCK_SIZE
+        var py := top_left.y + (b.y - shape_bounds.position.y) * BLOCK_SIZE
+        positions.append(Vector2(px, py))
+    return positions
 
