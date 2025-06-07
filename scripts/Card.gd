@@ -4,10 +4,14 @@ class_name Card
 var card_name: String = ""
 var value: int = 1
 
+# Amount of energy required to play this card
+const energy_cost: int = 1
+
 # Name of the tetris shape for this card
 var shape_name: String = "L"
 
 var sprite: Sprite2D
+var cost_label: Label
 
 # Base sizes used prior to scaling
 const BASE_CARD_WIDTH := 100
@@ -56,6 +60,12 @@ func _ready():
     original_position = position
     sprite = Sprite2D.new()
     add_child(sprite)
+    cost_label = get_node_or_null("CostLabel")
+    if cost_label == null:
+        cost_label = Label.new()
+        add_child(cost_label)
+    cost_label.text = str(energy_cost)
+    cost_label.z_index = 1
     _update_textures()
     sprite.texture = card_texture
     sprite.centered = true
@@ -102,6 +112,8 @@ func _update_textures():
     card_texture = _create_card_texture(blocks)
     piece_texture = _create_piece_texture(blocks)
     size = Vector2(card_width, card_height)
+    if cost_label:
+        cost_label.position = Vector2(-size.x / 2 + 5, -size.y / 2 + 5)
 
 func _create_card_texture(blocks: Array[Vector2]) -> ImageTexture:
     var width := card_width
