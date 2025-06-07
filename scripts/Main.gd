@@ -4,6 +4,9 @@ var _cards: Array[Card] = []
 var _previous_viewport_size := Vector2.ZERO
 var _grids: Array[Grid] = []
 var _end_button: Button
+var _energy_label: Label
+const ENERGY_PER_TURN := 3
+var _energy_available: int = ENERGY_PER_TURN
 
 const SHAPES := ["I", "L", "O", "T", "S", "Z"]
 const CARD_SCENE := preload("res://scenes/Card.tscn")
@@ -25,6 +28,11 @@ func _ready():
         _end_button.custom_minimum_size = Vector2(100, 30)
         _end_button.position = Vector2(10, 10)
         _end_button.pressed.connect(_on_EndTurnButton_pressed)
+
+    _energy_label = Label.new()
+    _energy_label.position = Vector2(120, 10)
+    add_child(_energy_label)
+    _update_energy_label()
 
     _add_random_cards()
 
@@ -76,10 +84,14 @@ func _update_scale():
     Card.update_scale(new_size)
 
 func on_card_dropped(card: Card) -> bool:
+    if _energy_available < card.energy_cost:
+        return false
     for grid in _grids:
         if grid.try_place_piece(card):
             _cards.erase(card)
             card.queue_free()
+            _energy_available -= card.energy_cost
+            _update_energy_label()
             _update_card_positions()
             clear_previews()
             return true
@@ -112,4 +124,10 @@ func _on_EndTurnButton_pressed() -> void:
     _add_random_cards()
     _update_card_positions()
     clear_previews()
+    _energy_available = ENERGY_PER_TURN
+    _update_energy_label()
+
+func _update_energy_label() -> void:
+    if _energy_label:
+        _energy_label.text = "Energy: %d/%d" % [_energy_available, ENERGY_PER_TURN]
 
