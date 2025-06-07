@@ -24,9 +24,11 @@ static func update_scale(new_cell_size: float) -> void:
     var scale := new_cell_size / BASE_BLOCK_SIZE
     card_width = int(BASE_CARD_WIDTH * scale)
     card_height = int(BASE_CARD_HEIGHT * scale)
-    for c in get_tree().get_nodes_in_group("Cards"):
-        if c is Card:
-            c._update_textures()
+    var tree := Engine.get_main_loop()
+    if tree is SceneTree:
+        for c in tree.get_nodes_in_group("Cards"):
+            if c is Card:
+                c._update_textures()
 
 var size := Vector2(card_width, card_height)
 var card_texture: ImageTexture
