@@ -2,13 +2,17 @@ extends Node2D
 
 var _cards: Array[Card] = []
 var _previous_viewport_size := Vector2.ZERO
+var _grids: Array[Grid] = []
 
 const SHAPES := ["I", "L", "O", "T", "S", "Z"]
 const CARD_SCENE := preload("res://scenes/Card.tscn")
 const BOTTOM_MARGIN := 10.0
+const GRID_MARGIN := 20.0
 
 func _ready():
     _previous_viewport_size = get_viewport_rect().size
+    _grids = [get_node("LeftGrid"), get_node("RightGrid")]
+    _position_grids()
 
     var available := SHAPES.duplicate()
     available.shuffle()
@@ -27,6 +31,7 @@ func _process(delta):
     if current_size != _previous_viewport_size:
         _previous_viewport_size = current_size
         _update_card_positions()
+        _position_grids()
 
 func _update_card_positions():
     var viewport_size := _previous_viewport_size
@@ -37,4 +42,24 @@ func _update_card_positions():
         var bottom_y: float = viewport_size.y - card.size.y / 2.0 - BOTTOM_MARGIN
         card.position = Vector2(spacing * (i + 1), bottom_y)
         card.set_original_position()
+
+func _position_grids():
+    if _grids.size() < 2:
+        return
+    var viewport_size := _previous_viewport_size
+    var grid_width := Grid.COLS * Grid.CELL_SIZE
+    var top_y := GRID_MARGIN
+    var left_x := GRID_MARGIN
+    _grids[0].position = Vector2(left_x, top_y)
+    var right_x := viewport_size.x - grid_width - GRID_MARGIN
+    _grids[1].position = Vector2(right_x, top_y)
+
+func on_card_dropped(card: Card) -> bool:
+    for grid in _grids:
+        if grid.try_place_piece(card):
+            _cards.erase(card)
+            card.queue_free()
+            _update_card_positions()
+            return true
+    return false
 
