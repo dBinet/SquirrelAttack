@@ -33,21 +33,21 @@ func _get_piece_indices(card) -> Array[Vector2i]:
     # Use the first block as the alignment reference. The piece must be
     # reasonably close to the grid so that all blocks share the same offset.
     var first_local := to_local(positions[0])
-    var cell_x := first_local.x / CELL_SIZE
-    var cell_y := first_local.y / CELL_SIZE
-    var off_x := cell_x - round(cell_x)
-    var off_y := cell_y - round(cell_y)
+    var cell_x: float = first_local.x / CELL_SIZE
+    var cell_y: float = first_local.y / CELL_SIZE
+    var off_x: float = cell_x - round(cell_x)
+    var off_y: float = cell_y - round(cell_y)
     if abs(off_x) > 0.25 or abs(off_y) > 0.25:
         return result
 
     for pos in positions:
         var local := to_local(pos)
-        var lx := local.x / CELL_SIZE - off_x
-        var ly := local.y / CELL_SIZE - off_y
+        var lx: float = local.x / CELL_SIZE - off_x
+        var ly: float = local.y / CELL_SIZE - off_y
         if abs(lx - round(lx)) > 0.25 or abs(ly - round(ly)) > 0.25:
             return []
-        var ix := int(round(lx))
-        var iy := int(round(ly))
+        var ix: int = int(round(lx))
+        var iy: int = int(round(ly))
         result.append(Vector2i(ix, iy))
     return result
 
