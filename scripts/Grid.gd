@@ -22,6 +22,27 @@ static func set_cell_size(new_size: float) -> void:
 var cells: Array = []
 var preview_cells: Array[Vector2i] = []
 
+func _get_piece_indices(card) -> Array[Vector2i]:
+    var result: Array[Vector2i] = []
+    if not card.has_method("get_global_block_positions"):
+        return result
+    var positions: Array[Vector2] = card.get_global_block_positions()
+    if positions.is_empty():
+        return result
+    var first_local := to_local(positions[0])
+    var frac_x := fposmod(first_local.x, CELL_SIZE)
+    var frac_y := fposmod(first_local.y, CELL_SIZE)
+    for pos in positions:
+        var local := to_local(pos)
+        if abs(fposmod(local.x, CELL_SIZE) - frac_x) > 0.1:
+            return []
+        if abs(fposmod(local.y, CELL_SIZE) - frac_y) > 0.1:
+            return []
+        var ix := int(round(local.x / CELL_SIZE))
+        var iy := int(round(local.y / CELL_SIZE))
+        result.append(Vector2i(ix, iy))
+    return result
+
 func _ready():
     for x in range(COLS):
         cells.append([])
@@ -47,19 +68,14 @@ func _draw():
         draw_rect(Rect2(idx.x * CELL_SIZE, idx.y * CELL_SIZE, CELL_SIZE, CELL_SIZE), preview_color)
 
 func try_place_piece(card) -> bool:
-    if not card.has_method("get_global_block_positions"):
+    var indices := _get_piece_indices(card)
+    if indices.is_empty():
         return false
-    var positions: Array[Vector2] = card.get_global_block_positions()
-    var indices: Array[Vector2i] = []
-    for pos in positions:
-        var local := to_local(pos)
-        var ix := int(round(local.x / CELL_SIZE))
-        var iy := int(round(local.y / CELL_SIZE))
-        if ix < 0 or ix >= COLS or iy < 0 or iy >= ROWS:
+    for idx in indices:
+        if idx.x < 0 or idx.x >= COLS or idx.y < 0 or idx.y >= ROWS:
             return false
-        if cells[ix][iy]:
+        if cells[idx.x][idx.y]:
             return false
-        indices.append(Vector2i(ix, iy))
     for idx in indices:
         cells[idx.x][idx.y] = true
     queue_redraw()
@@ -67,21 +83,18 @@ func try_place_piece(card) -> bool:
 
 func preview_piece(card) -> void:
     preview_cells.clear()
-    if not card.has_method("get_global_block_positions"):
+    var indices := _get_piece_indices(card)
+    if indices.is_empty():
         queue_redraw()
         return
-    var positions: Array[Vector2] = card.get_global_block_positions()
-    for pos in positions:
-        var local := to_local(pos)
-        var ix := int(round(local.x / CELL_SIZE))
-        var iy := int(round(local.y / CELL_SIZE))
-        if ix < 0 or ix >= COLS or iy < 0 or iy >= ROWS:
+    for idx in indices:
+        if idx.x < 0 or idx.x >= COLS or idx.y < 0 or idx.y >= ROWS:
             queue_redraw()
             return
-        if cells[ix][iy]:
+        if cells[idx.x][idx.y]:
             queue_redraw()
             return
-        preview_cells.append(Vector2i(ix, iy))
+    preview_cells = indices.duplicate()
     queue_redraw()
 
 func clear_preview() -> void:
