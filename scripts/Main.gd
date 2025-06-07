@@ -66,7 +66,9 @@ func _position_grids():
 func _update_scale():
     var viewport_size := _previous_viewport_size
     var horiz := (viewport_size.x - GRID_MARGIN) / (Grid.COLS * 2)
-    var vert := (viewport_size.y - GRID_VERTICAL_OFFSET * 2) / Grid.ROWS
+    var base_ratio := Card.BASE_CARD_HEIGHT / Card.BASE_BLOCK_SIZE
+    var vert := (viewport_size.y - GRID_VERTICAL_OFFSET * 2 - BOTTOM_MARGIN) /
+            (Grid.ROWS * GRID_VERTICAL_SCALE + base_ratio)
     var new_size: int = int(floor(min(horiz, vert)))
     if new_size <= 0:
         new_size = 1
