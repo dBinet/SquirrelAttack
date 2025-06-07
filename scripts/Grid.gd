@@ -5,6 +5,9 @@ const COLS := 10
 const ROWS := 20
 # Base cell size used to compute scaling
 const BASE_CELL_SIZE := 20
+# How far a piece can be from perfect alignment (in cell units) and still
+# snap to the grid when dropped. Larger values make snapping easier.
+const SNAP_TOLERANCE := 0.5
 
 # Actual cell size used for drawing. Updated by `Main.gd` when the
 # viewport changes to keep the grids relative to the screen size.
@@ -37,14 +40,14 @@ func _get_piece_indices(card) -> Array[Vector2i]:
     var cell_y: float = first_local.y / CELL_SIZE
     var off_x: float = cell_x - round(cell_x)
     var off_y: float = cell_y - round(cell_y)
-    if abs(off_x) > 0.25 or abs(off_y) > 0.25:
+    if abs(off_x) > SNAP_TOLERANCE or abs(off_y) > SNAP_TOLERANCE:
         return result
 
     for pos in positions:
         var local := to_local(pos)
         var lx: float = local.x / CELL_SIZE - off_x
         var ly: float = local.y / CELL_SIZE - off_y
-        if abs(lx - round(lx)) > 0.25 or abs(ly - round(ly)) > 0.25:
+        if abs(lx - round(lx)) > SNAP_TOLERANCE or abs(ly - round(ly)) > SNAP_TOLERANCE:
             return []
         var ix: int = int(round(lx))
         var iy: int = int(round(ly))
