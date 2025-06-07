@@ -6,6 +6,7 @@ const ROWS := 20
 const CELL_SIZE := 20
 
 var cells: Array = []
+var preview_cells: Array[Vector2i] = []
 
 func _ready():
     for x in range(COLS):
@@ -27,6 +28,9 @@ func _draw():
         for y in range(ROWS):
             if cells[x][y]:
                 draw_rect(Rect2(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE), fill_color)
+    var preview_color := Color(0, 0, 1, 0.5)
+    for idx in preview_cells:
+        draw_rect(Rect2(idx.x * CELL_SIZE, idx.y * CELL_SIZE, CELL_SIZE, CELL_SIZE), preview_color)
 
 func try_place_piece(card) -> bool:
     if not card.has_method("get_global_block_positions"):
@@ -46,3 +50,28 @@ func try_place_piece(card) -> bool:
         cells[idx.x][idx.y] = true
     queue_redraw()
     return true
+
+func preview_piece(card) -> void:
+    preview_cells.clear()
+    if not card.has_method("get_global_block_positions"):
+        queue_redraw()
+        return
+    var positions: Array[Vector2] = card.get_global_block_positions()
+    for pos in positions:
+        var local := to_local(pos)
+        var ix := int(floor(local.x / CELL_SIZE))
+        var iy := int(floor(local.y / CELL_SIZE))
+        if ix < 0 or ix >= COLS or iy < 0 or iy >= ROWS:
+            queue_redraw()
+            return
+        if cells[ix][iy]:
+            queue_redraw()
+            return
+        preview_cells.append(Vector2i(ix, iy))
+    queue_redraw()
+
+func clear_preview() -> void:
+    if preview_cells.is_empty():
+        return
+    preview_cells.clear()
+    queue_redraw()

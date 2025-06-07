@@ -60,6 +60,16 @@ func on_card_dropped(card: Card) -> bool:
             _cards.erase(card)
             card.queue_free()
             _update_card_positions()
+            clear_previews()
             return true
+    clear_previews()
     return false
+
+func preview_card_drag(card: Card) -> void:
+    for grid in _grids:
+        grid.preview_piece(card)
+
+func clear_previews() -> void:
+    for grid in _grids:
+        grid.clear_preview()
 
