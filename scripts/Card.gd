@@ -60,11 +60,11 @@ func _process(delta):
         position = get_global_mouse_position() + drag_offset
 
 func _update_textures():
-    var blocks = SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
+    var blocks: Array[Vector2] = SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
     card_texture = _create_card_texture(blocks)
     piece_texture = _create_piece_texture(blocks)
 
-func _create_card_texture(blocks: Array) -> ImageTexture:
+func _create_card_texture(blocks: Array[Vector2]) -> ImageTexture:
     var width := 100
     var height := 150
     var img := Image.create(width, height, false, Image.FORMAT_RGBA8)
@@ -86,7 +86,7 @@ func _create_card_texture(blocks: Array) -> ImageTexture:
 
     return ImageTexture.create_from_image(img)
 
-func _create_piece_texture(blocks: Array) -> ImageTexture:
+func _create_piece_texture(blocks: Array[Vector2]) -> ImageTexture:
     var bounds := _get_shape_bounds(blocks)
     var width := int(bounds.size.x) * BLOCK_SIZE
     var height := int(bounds.size.y) * BLOCK_SIZE
@@ -102,11 +102,11 @@ func _create_piece_texture(blocks: Array) -> ImageTexture:
     piece_size = Vector2(width, height)
     return ImageTexture.create_from_image(img)
 
-func _get_shape_bounds(blocks: Array) -> Rect2:
-    var min_x := blocks[0].x
-    var max_x := blocks[0].x
-    var min_y := blocks[0].y
-    var max_y := blocks[0].y
+func _get_shape_bounds(blocks: Array[Vector2]) -> Rect2:
+    var min_x: float = blocks[0].x
+    var max_x: float = blocks[0].x
+    var min_y: float = blocks[0].y
+    var max_y: float = blocks[0].y
     for b in blocks:
         min_x = min(min_x, b.x)
         max_x = max(max_x, b.x)
