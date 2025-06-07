@@ -148,8 +148,8 @@ func get_global_block_positions() -> Array[Vector2]:
     var top_left := position - size / 2.0
     var positions: Array[Vector2] = []
     for b in blocks:
-        var px := top_left.x + (b.x - shape_bounds.position.x) * BLOCK_SIZE
-        var py := top_left.y + (b.y - shape_bounds.position.y) * BLOCK_SIZE
+        var px: float = top_left.x + (b.x - shape_bounds.position.x) * BLOCK_SIZE
+        var py: float = top_left.y + (b.y - shape_bounds.position.y) * BLOCK_SIZE
         positions.append(Vector2(px, py))
     return positions
 

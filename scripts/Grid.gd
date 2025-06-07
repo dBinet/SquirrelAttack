@@ -12,7 +12,7 @@ func _ready():
         cells.append([])
         for y in range(ROWS):
             cells[x].append(false)
-    update()
+    queue_redraw()
 
 func _draw():
     var width := COLS * CELL_SIZE
@@ -31,8 +31,8 @@ func _draw():
 func try_place_piece(card) -> bool:
     if not card.has_method("get_global_block_positions"):
         return false
-    var positions := card.get_global_block_positions()
-    var indices := []
+    var positions: Array[Vector2] = card.get_global_block_positions()
+    var indices: Array[Vector2i] = []
     for pos in positions:
         var local := to_local(pos)
         var ix := int(floor(local.x / CELL_SIZE))
@@ -44,5 +44,5 @@ func try_place_piece(card) -> bool:
         indices.append(Vector2i(ix, iy))
     for idx in indices:
         cells[idx.x][idx.y] = true
-    update()
+    queue_redraw()
     return true
