@@ -9,6 +9,9 @@ func _ready():
     for i in range(num_cards):
         var card := card_scene.instantiate()
         add_child(card)
-        card.position = Vector2(spacing * (i + 1), viewport_size.y / 2)
+        card.position = Vector2(
+            spacing * (i + 1),
+            viewport_size.y * 2.0 / 3.0
+        )
         card.set_original_position()
 
