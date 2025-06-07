@@ -48,9 +48,10 @@ func _position_grids():
         return
     var viewport_size := _previous_viewport_size
     var grid_width := Grid.COLS * Grid.CELL_SIZE
+    var grid_height := Grid.ROWS * Grid.CELL_SIZE
     var pair_width := grid_width * 2 + GRID_MARGIN
     var start_x := (viewport_size.x - pair_width) / 2.0
-    var top_y := GRID_MARGIN
+    var top_y := (viewport_size.y - grid_height) / 2.0
     _grids[0].position = Vector2(start_x, top_y)
     _grids[1].position = Vector2(start_x + grid_width + GRID_MARGIN, top_y)
 
