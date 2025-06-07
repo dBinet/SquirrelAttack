@@ -70,6 +70,13 @@ func _input(event):
 func _process(delta):
     if is_dragging:
         position = get_global_mouse_position() + drag_offset
+        var parent = get_parent()
+        if parent and parent.has_method("preview_card_drag"):
+            parent.preview_card_drag(self)
+    else:
+        var parent = get_parent()
+        if parent and parent.has_method("clear_previews"):
+            parent.clear_previews()
 
 func _update_textures():
     var shape_blocks: Array = SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
