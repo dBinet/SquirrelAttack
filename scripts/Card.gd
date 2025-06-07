@@ -57,8 +57,8 @@ func _create_card_texture() -> ImageTexture:
     for block in blocks:
         for x in range(block_size):
             for y in range(block_size):
-                var px := start_x + block.x * block_size + x
-                var py := start_y + block.y * block_size + y
+                var px: int = start_x + int(block.x) * block_size + x
+                var py: int = start_y + int(block.y) * block_size + y
                 img.set_pixel(px, py, black)
 
     var tex := ImageTexture.create_from_image(img)
