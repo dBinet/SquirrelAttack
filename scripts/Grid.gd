@@ -12,10 +12,12 @@ static var CELL_SIZE := BASE_CELL_SIZE
 
 static func set_cell_size(new_size: float) -> void:
     CELL_SIZE = new_size
-    # Redraw all existing grid instances when the cell size changes
-    for grid in get_tree().get_nodes_in_group("GridInstances"):
-        if grid is Grid:
-            grid.queue_redraw()
+    # Redraw all existing grid instances when the cell size changes.
+    var tree := Engine.get_main_loop()
+    if tree is SceneTree:
+        for grid in tree.get_nodes_in_group("GridInstances"):
+            if grid is Grid:
+                grid.queue_redraw()
 
 var cells: Array = []
 var preview_cells: Array[Vector2i] = []
