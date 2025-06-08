@@ -66,6 +66,7 @@ func _ready():
         add_child(cost_label)
     cost_label.text = str(energy_cost)
     cost_label.z_index = 1
+    cost_label.add_theme_color_override("font_color", Color.BLACK)
     _update_textures()
     sprite.texture = card_texture
     sprite.centered = true
@@ -114,6 +115,7 @@ func _update_textures():
     size = Vector2(card_width, card_height)
     if cost_label:
         cost_label.position = Vector2(-size.x / 2 + 5, -size.y / 2 + 5)
+        cost_label.add_theme_font_size_override("font_size", int(block_size))
 
 func _create_card_texture(blocks: Array[Vector2]) -> ImageTexture:
     var width := card_width
