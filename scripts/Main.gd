@@ -218,18 +218,19 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
 func _update_character_scale() -> void:
     var grid_width: float = Grid.COLS * Grid.CELL_SIZE
     var grid_height: float = Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
-    var target_size: float = min(grid_width, grid_height)
 
     if _alien_sprite and _alien_sprite.texture:
-        var tex_size := _alien_sprite.texture.get_size()
-        var base: float = max(tex_size.x, tex_size.y)
-        var factor: float = target_size / base
+        var bounds: Vector2 = CHARACTER_DATA.get_bounds("alien")
+        var factor_x: float = bounds.x > 0 ? grid_width / bounds.x : 1.0
+        var factor_y: float = bounds.y > 0 ? grid_height / bounds.y : 1.0
+        var factor: float = min(factor_x, factor_y)
         _alien_sprite.scale = Vector2(factor, factor)
 
     if _mech_sprite and _mech_sprite.texture:
-        var tex_size := _mech_sprite.texture.get_size()
-        var base: float = max(tex_size.x, tex_size.y)
-        var factor: float = target_size / base
+        var bounds: Vector2 = CHARACTER_DATA.get_bounds("mech")
+        var factor_x: float = bounds.x > 0 ? grid_width / bounds.x : 1.0
+        var factor_y: float = bounds.y > 0 ? grid_height / bounds.y : 1.0
+        var factor: float = min(factor_x, factor_y)
         _mech_sprite.scale = Vector2(factor, factor)
 
 func _update_creature_positions() -> void:
@@ -237,6 +238,8 @@ func _update_creature_positions() -> void:
         return
     var grid_width := Grid.COLS * Grid.CELL_SIZE
     var grid_height := Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
-    _alien_sprite.position = _grids[0].position + Vector2(grid_width / 2, grid_height / 2)
-    _mech_sprite.position = _grids[1].position + Vector2(grid_width / 2, grid_height / 2)
+    var alien_off: Vector2 = CHARACTER_DATA.get_center_offset("alien") * _alien_sprite.scale.x
+    var mech_off: Vector2 = CHARACTER_DATA.get_center_offset("mech") * _mech_sprite.scale.x
+    _alien_sprite.position = _grids[0].position + Vector2(grid_width / 2, grid_height / 2) + alien_off
+    _mech_sprite.position = _grids[1].position + Vector2(grid_width / 2, grid_height / 2) + mech_off
 
