@@ -22,10 +22,10 @@ static func set_cell_size(new_size: float) -> void:
             if grid is Grid:
                 grid.queue_redraw()
 
-var cells: Array = []
+var cells: Array[Array[bool]] = []
 var preview_cells: Array[Vector2i] = []
 
-func _get_piece_indices(card) -> Array[Vector2i]:
+func _get_piece_indices(card: Node) -> Array[Vector2i]:
     var result: Array[Vector2i] = []
     if not card.has_method("get_global_block_positions"):
         return result
@@ -54,14 +54,14 @@ func _get_piece_indices(card) -> Array[Vector2i]:
         result.append(Vector2i(ix, iy))
     return result
 
-func _ready():
+func _ready() -> void:
     for x in range(COLS):
         cells.append([])
         for y in range(ROWS):
             cells[x].append(false)
     queue_redraw()
 
-func _draw():
+func _draw() -> void:
     var width := COLS * CELL_SIZE
     var height := ROWS * CELL_SIZE
     var line_color := Color(0.7, 0.7, 0.7)
@@ -78,7 +78,7 @@ func _draw():
     for idx in preview_cells:
         draw_rect(Rect2(idx.x * CELL_SIZE, idx.y * CELL_SIZE, CELL_SIZE, CELL_SIZE), preview_color)
 
-func try_place_piece(card) -> bool:
+func try_place_piece(card: Node) -> bool:
     var indices := _get_piece_indices(card)
     if indices.is_empty():
         return false
@@ -92,7 +92,7 @@ func try_place_piece(card) -> bool:
     queue_redraw()
     return true
 
-func preview_piece(card) -> void:
+func preview_piece(card: Node) -> void:
     preview_cells.clear()
     var indices := _get_piece_indices(card)
     if indices.is_empty():
