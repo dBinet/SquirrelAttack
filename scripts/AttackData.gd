@@ -15,11 +15,11 @@ static func _load_data() -> void:
         return
 
     var json_text := file.get_as_text()
-    var data := JSON.parse_string(json_text)
+    var data: Variant = JSON.parse_string(json_text)
     if typeof(data) != TYPE_DICTIONARY or not data.has("attacks"):
         return
 
-    var arr := data["attacks"]
+    var arr: Array = data["attacks"]
     if arr is Array:
         for attack in arr:
             if attack is Array:
