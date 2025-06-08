@@ -24,6 +24,7 @@ static func set_cell_size(new_size: float) -> void:
 
 var cells: Array = []
 var preview_cells: Array[Vector2i] = []
+var danger_cells: Array[Vector2i] = []
 
 func _get_piece_indices(card: Node) -> Array[Vector2i]:
     var result: Array[Vector2i] = []
@@ -77,6 +78,9 @@ func _draw() -> void:
     var preview_color := Color(0, 0, 1, 0.5)
     for idx in preview_cells:
         draw_rect(Rect2(idx.x * CELL_SIZE, idx.y * CELL_SIZE, CELL_SIZE, CELL_SIZE), preview_color)
+    var danger_color := Color(1, 0, 0, 0.5)
+    for idx in danger_cells:
+        draw_rect(Rect2(idx.x * CELL_SIZE, idx.y * CELL_SIZE, CELL_SIZE, CELL_SIZE), danger_color)
 
 func try_place_piece(card: Node) -> bool:
     var indices := _get_piece_indices(card)
@@ -113,3 +117,29 @@ func clear_preview() -> void:
         return
     preview_cells.clear()
     queue_redraw()
+
+func highlight_random_cells(num: int) -> void:
+    danger_cells.clear()
+    var chosen: Array[Vector2i] = []
+    var total := COLS * ROWS
+    num = clamp(num, 0, total)
+    while danger_cells.size() < num:
+        var x := randi_range(0, COLS - 1)
+        var y := randi_range(0, ROWS - 1)
+        var c := Vector2i(x, y)
+        if not danger_cells.has(c):
+            danger_cells.append(c)
+    queue_redraw()
+
+func clear_highlights() -> void:
+    if danger_cells.is_empty():
+        return
+    danger_cells.clear()
+    queue_redraw()
+
+func count_uncovered_highlights() -> int:
+    var count := 0
+    for c in danger_cells:
+        if not cells[c.x][c.y]:
+            count += 1
+    return count
