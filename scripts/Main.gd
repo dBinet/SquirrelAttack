@@ -155,7 +155,11 @@ func _highlight_new_round() -> void:
 func _apply_danger_damage() -> void:
     if _grids.size() < 2:
         return
-    var dmg := _grids[1].count_uncovered_highlights()
+    var rect := Rect2()
+    if _mech_sprite and _mech_sprite.texture:
+        var tex_size := _mech_sprite.texture.get_size() * _mech_sprite.scale
+        rect = Rect2(_mech_sprite.global_position - tex_size / 2.0, tex_size)
+    var dmg := _grids[1].count_uncovered_highlights_in_rect(rect)
     _player_health -= dmg
     _update_health_labels()
     _grids[1].clear_highlights()

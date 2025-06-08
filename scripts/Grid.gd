@@ -150,3 +150,12 @@ func count_uncovered_highlights() -> int:
         if not cells[c.x][c.y]:
             count += 1
     return count
+
+func count_uncovered_highlights_in_rect(area: Rect2) -> int:
+    var count := 0
+    for c in danger_cells:
+        if not cells[c.x][c.y]:
+            var center := to_global(Vector2((c.x + 0.5) * CELL_SIZE, (c.y + 0.5) * CELL_SIZE))
+            if area.has_point(center):
+                count += 1
+    return count
