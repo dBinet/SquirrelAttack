@@ -125,7 +125,7 @@ func highlight_random_cells(num: int) -> void:
         for y in range(ROWS):
             all_cells.append(Vector2i(x, y))
     all_cells.shuffle()
-    var max_cells := min(num, all_cells.size())
+    var max_cells: int = min(num, all_cells.size())
     for i in range(max_cells):
         danger_cells.append(all_cells[i])
     queue_redraw()

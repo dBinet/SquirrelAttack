@@ -242,7 +242,7 @@ func _update_sprite(sprite: Sprite2D, name: String, width: float, height: float)
         var tex_size: Vector2 = sprite.texture.get_size()
         var factor_x := width / tex_size.x if tex_size.x > 0 else 1.0
         var factor_y := height / tex_size.y if tex_size.y > 0 else 1.0
-        var factor := min(factor_x, factor_y)
+        var factor: float = min(factor_x, factor_y)
         sprite.scale = Vector2(factor, factor)
 
 func _update_creature_positions() -> void:
