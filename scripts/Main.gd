@@ -157,8 +157,10 @@ func _update_health_label_positions() -> void:
     _player_health_label.position = _grids[1].position + Vector2(grid_width / 2, -20)
 
 func _apply_damage(grid_idx: int, card: Card) -> void:
-    var blocks := card.SHAPE_DATA.get(card.shape_name, [])
-    var dmg := blocks.size()
+    var shape_blocks: Array = card.SHAPE_DATA.get(card.shape_name, [])
+    var blocks: Array[Vector2] = []
+    blocks.assign(shape_blocks)
+    var dmg: int = blocks.size()
     if grid_idx == 0:
         _enemy_health -= dmg
     else:
