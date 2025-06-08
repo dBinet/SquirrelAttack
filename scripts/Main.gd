@@ -208,9 +208,15 @@ func _update_health_label_positions() -> void:
     _player_health_label.position = _grids[1].position + Vector2(grid_width / 2, -20)
 
 func _apply_damage(grid_idx: int, card: Card) -> void:
-    var blocks: Array[Vector2] = ShapeData.get_blocks(card.shape_name)
-    var dmg: int = blocks.size()
-    if grid_idx == 0:
+    var dmg: int = 0
+    if grid_idx == 0 and _alien_sprite and _alien_sprite.texture:
+        var sprite_size := _alien_sprite.texture.get_size() * _alien_sprite.scale
+        var sprite_rect := Rect2(_alien_sprite.global_position - sprite_size / 2.0, sprite_size)
+        var blocks: Array[Vector2] = card.get_global_block_positions()
+        for b in blocks:
+            var block_rect := Rect2(b, Vector2(Grid.CELL_SIZE, Grid.CELL_SIZE))
+            if sprite_rect.intersects(block_rect):
+                dmg += 1
         _enemy_health -= dmg
     _update_health_labels()
 
