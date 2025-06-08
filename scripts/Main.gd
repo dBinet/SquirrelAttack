@@ -12,6 +12,7 @@ var _energy_available: int = ENERGY_PER_TURN
 const STARTING_HEALTH := 10
 var _player_health: int = STARTING_HEALTH
 var _enemy_health: int = STARTING_HEALTH
+const HAZARDS_PER_ROUND := 4
 
 const SHAPES := ["I", "L", "O", "T", "S", "Z"]
 const CARD_SCENE := preload("res://scenes/Card.tscn")
@@ -50,6 +51,7 @@ func _ready() -> void:
     _update_scale()
     _update_card_positions()
     _position_grids()
+    _highlight_new_round()
 
 func _process(delta: float) -> void:
     var current_size := get_viewport_rect().size
@@ -118,6 +120,19 @@ func clear_previews() -> void:
     for grid in _grids:
         grid.clear_preview()
 
+func _highlight_new_round() -> void:
+    if _grids.size() < 2:
+        return
+    _grids[1].highlight_random_cells(HAZARDS_PER_ROUND)
+
+func _apply_danger_damage() -> void:
+    if _grids.size() < 2:
+        return
+    var dmg := _grids[1].count_uncovered_highlights()
+    _player_health -= dmg
+    _update_health_labels()
+    _grids[1].clear_highlights()
+
 func _discard_remaining_cards() -> void:
     for card in _cards:
         card.queue_free()
@@ -132,12 +147,14 @@ func _add_random_cards(num: int = 5) -> void:
         _cards.append(card)
 
 func _on_EndTurnButton_pressed() -> void:
+    _apply_danger_damage()
     _discard_remaining_cards()
     _add_random_cards()
     _update_card_positions()
     clear_previews()
     _energy_available = ENERGY_PER_TURN
     _update_energy_label()
+    _highlight_new_round()
 
 func _update_energy_label() -> void:
     if _energy_label:
