@@ -14,6 +14,10 @@ var _player_health: int = STARTING_HEALTH
 var _enemy_health: int = STARTING_HEALTH
 const HAZARDS_PER_ROUND := 4
 
+# Sprite placeholders for an alien and a mech that appear behind the grids
+var _alien_sprite: Sprite2D
+var _mech_sprite: Sprite2D
+
 const ATTACK_DATA = preload("res://scripts/AttackData.gd")
 
 const CARD_SCENE := preload("res://scenes/Card.tscn")
@@ -49,6 +53,17 @@ func _ready() -> void:
     _enemy_health_label = Label.new()
     add_child(_enemy_health_label)
     _update_health_labels()
+
+    # Create sprite placeholders for the alien and mech behind the grids
+    _alien_sprite = Sprite2D.new()
+    _alien_sprite.texture = _create_alien_texture()
+    _alien_sprite.z_index = -1
+    add_child(_alien_sprite)
+
+    _mech_sprite = Sprite2D.new()
+    _mech_sprite.texture = _create_mech_texture()
+    _mech_sprite.z_index = -1
+    add_child(_mech_sprite)
 
     _add_random_cards()
 
@@ -89,6 +104,7 @@ func _position_grids() -> void:
     _grids[0].position = Vector2(start_x, top_y)
     _grids[1].position = Vector2(start_x + grid_width + GRID_MARGIN, top_y)
     _update_health_label_positions()
+    _update_creature_positions()
 
 func _update_scale() -> void:
     var viewport_size := _previous_viewport_size
@@ -98,6 +114,7 @@ func _update_scale() -> void:
     var new_size: int = max(1, int(floor(min(horiz, vert))))
     Grid.set_cell_size(new_size)
     Card.update_scale(new_size)
+    _update_character_scale()
 
 func on_card_dropped(card: Card) -> bool:
     if _energy_available < card.energy_cost:
@@ -190,4 +207,46 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
     if grid_idx == 0:
         _enemy_health -= dmg
     _update_health_labels()
+
+# Generate a simple green circle texture to represent the alien
+func _create_alien_texture() -> ImageTexture:
+    var size := 64
+    var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+    img.fill(Color(0, 0, 0, 0))
+    var center := Vector2(size / 2, size / 2)
+    var radius := size / 2 - 2
+    for x in range(size):
+        for y in range(size):
+            if center.distance_to(Vector2(x, y)) <= radius:
+                img.set_pixel(x, y, Color(0, 1, 0))
+    for x in range(20, 26):
+        for y in range(20, 26):
+            img.set_pixel(x, y, Color.BLACK)
+            img.set_pixel(size - 1 - x, y, Color.BLACK)
+    return ImageTexture.create_from_image(img)
+
+# Generate a simple gray square texture to represent the mech
+func _create_mech_texture() -> ImageTexture:
+    var size := 64
+    var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+    img.fill(Color(0.6, 0.6, 0.6))
+    for x in range(size):
+        img.set_pixel(x, 10, Color.BLACK)
+        img.set_pixel(x, size - 11, Color.BLACK)
+    return ImageTexture.create_from_image(img)
+
+func _update_character_scale() -> void:
+    var grid_height := Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
+    var target := grid_height * 0.7
+    var factor := target / 64.0
+    _alien_sprite.scale = Vector2(factor, factor)
+    _mech_sprite.scale = Vector2(factor, factor)
+
+func _update_creature_positions() -> void:
+    if _grids.size() < 2:
+        return
+    var grid_width := Grid.COLS * Grid.CELL_SIZE
+    var grid_height := Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
+    _alien_sprite.position = _grids[0].position + Vector2(grid_width / 2, grid_height / 2)
+    _mech_sprite.position = _grids[1].position + Vector2(grid_width / 2, grid_height / 2)
 
