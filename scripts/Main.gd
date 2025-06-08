@@ -14,6 +14,8 @@ var _player_health: int = STARTING_HEALTH
 var _enemy_health: int = STARTING_HEALTH
 const HAZARDS_PER_ROUND := 4
 
+const ATTACK_DATA = preload("res://scripts/AttackData.gd")
+
 const CARD_SCENE := preload("res://scenes/Card.tscn")
 const BOTTOM_MARGIN := 10.0
 const GRID_MARGIN := 20.0
@@ -125,7 +127,11 @@ func clear_previews() -> void:
 func _highlight_new_round() -> void:
     if _grids.size() < 2:
         return
-    _grids[1].highlight_random_cells(HAZARDS_PER_ROUND)
+    var attack: Array[Vector2i] = ATTACK_DATA.get_random_attack()
+    if attack.is_empty():
+        _grids[1].highlight_random_cells(HAZARDS_PER_ROUND)
+    else:
+        _grids[1].highlight_attack(attack)
 
 func _apply_danger_damage() -> void:
     if _grids.size() < 2:
