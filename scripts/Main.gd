@@ -182,6 +182,8 @@ func _add_random_cards(num: int = 5) -> void:
 
 func _on_EndTurnButton_pressed() -> void:
     _apply_danger_damage()
+    for g in _grids:
+        g.clear_cells()
     _discard_remaining_cards()
     _add_random_cards()
     _update_card_positions()

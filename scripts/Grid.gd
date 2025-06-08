@@ -159,3 +159,9 @@ func count_uncovered_highlights_in_rect(area: Rect2) -> int:
             if area.has_point(center):
                 count += 1
     return count
+
+func clear_cells() -> void:
+    for x in range(COLS):
+        for y in range(ROWS):
+            cells[x][y] = false
+    queue_redraw()
