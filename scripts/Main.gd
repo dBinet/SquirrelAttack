@@ -219,9 +219,18 @@ func _update_character_scale() -> void:
     var grid_width: float = Grid.COLS * Grid.CELL_SIZE
     var grid_height: float = Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
     var target_size: float = min(grid_width, grid_height)
-    var factor: float = target_size / 64.0
-    _alien_sprite.scale = Vector2(factor, factor)
-    _mech_sprite.scale = Vector2(factor, factor)
+
+    if _alien_sprite and _alien_sprite.texture:
+        var tex_size := _alien_sprite.texture.get_size()
+        var base := max(tex_size.x, tex_size.y)
+        var factor := target_size / base
+        _alien_sprite.scale = Vector2(factor, factor)
+
+    if _mech_sprite and _mech_sprite.texture:
+        var tex_size := _mech_sprite.texture.get_size()
+        var base := max(tex_size.x, tex_size.y)
+        var factor := target_size / base
+        _mech_sprite.scale = Vector2(factor, factor)
 
 func _update_creature_positions() -> void:
     if _grids.size() < 2:
