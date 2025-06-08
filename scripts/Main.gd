@@ -212,10 +212,10 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
 
 
 func _update_character_scale() -> void:
-    var grid_width := Grid.COLS * Grid.CELL_SIZE
-    var grid_height := Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
-    var max_size := min(grid_width, grid_height) * 0.7
-    var factor := max_size / 64.0
+    var grid_width: float = Grid.COLS * Grid.CELL_SIZE
+    var grid_height: float = Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
+    var max_size: float = min(grid_width, grid_height) * 0.7
+    var factor: float = max_size / 64.0
     _alien_sprite.scale = Vector2(factor, factor)
     _mech_sprite.scale = Vector2(factor, factor)
 
