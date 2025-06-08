@@ -16,9 +16,9 @@ This repository contains a minimal Godot project for a simple 2D card game proto
    and the right grid is the player. Each side now displays a health counter
    above its grid. At the start of each turn, one of the predefined attacks from
    `data/attacks.json` is chosen and those four squares on the player's grid
-   light up. Any lit square left uncovered when the "End Turn" button is pressed
-   causes one point of damage to the player. Placing pieces on the player's grid
-   does not reduce health directly; damage only comes from these uncovered
-   hazard squares.
+  light up. Any highlighted square left uncovered when the "End Turn" button is
+  pressed only deals damage if that cell overlaps the mech sprite. Placing
+  pieces on the player's grid does not reduce health directly; damage only comes
+  from these uncovered hazard squares that touch the mech.
 
 The project is intentionally minimal and can be extended with gameplay and assets.
