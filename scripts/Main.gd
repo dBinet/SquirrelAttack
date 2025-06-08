@@ -244,6 +244,13 @@ func _update_creature_positions() -> void:
     var grid_height := Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
     var alien_off: Vector2 = CHARACTER_DATA.get_center_offset("alien") * _alien_sprite.scale.x
     var mech_off: Vector2 = CHARACTER_DATA.get_center_offset("mech") * _mech_sprite.scale.x
-    _alien_sprite.position = _grids[0].position + Vector2(grid_width / 2, grid_height / 2) + alien_off
-    _mech_sprite.position = _grids[1].position + Vector2(grid_width / 2, grid_height / 2) + mech_off
+    var alien_pos := _grids[0].position + Vector2(grid_width / 2, grid_height / 2) + alien_off
+    var mech_pos := _grids[1].position + Vector2(grid_width / 2, grid_height / 2) + mech_off
+    var cell := float(Grid.CELL_SIZE)
+    alien_pos.x = round(alien_pos.x / cell) * cell
+    alien_pos.y = round(alien_pos.y / cell) * cell
+    mech_pos.x = round(mech_pos.x / cell) * cell
+    mech_pos.y = round(mech_pos.y / cell) * cell
+    _alien_sprite.position = alien_pos
+    _mech_sprite.position = mech_pos
 
