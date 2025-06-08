@@ -152,3 +152,9 @@ static func get_center_offset(name: String) -> Vector2:
         return _offsets[name]
     get_bounds(name)
     return _offsets.get(name, Vector2.ZERO)
+
+static func get_description(name: String) -> Dictionary:
+    _load_data()
+    if _characters.has(name):
+        return _characters[name]
+    return {}
