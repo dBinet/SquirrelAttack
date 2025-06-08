@@ -86,12 +86,12 @@ func _update_card_positions() -> void:
     var viewport_size := _previous_viewport_size
     var num_cards := _cards.size()
     var spacing := viewport_size.x / (num_cards + 1)
+    var bottom_y := viewport_size.y - BOTTOM_MARGIN
     for i in range(num_cards):
         var card := _cards[i]
         if card.is_dragging:
             continue
-        var bottom_y: float = viewport_size.y - card.size.y / 2.0 - BOTTOM_MARGIN
-        card.position = Vector2(spacing * (i + 1), bottom_y)
+        card.position = Vector2(spacing * (i + 1), bottom_y - card.size.y / 2.0)
         card.set_original_position()
 
 func _position_grids() -> void:
@@ -231,24 +231,19 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
 func _update_character_scale() -> void:
     var grid_width: float = Grid.COLS * Grid.CELL_SIZE
     var grid_height: float = Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
+    _update_sprite(_alien_sprite, "alien", grid_width, grid_height)
+    _update_sprite(_mech_sprite, "mech", grid_width, grid_height)
 
-    if _alien_sprite:
-        _alien_sprite.texture = CHARACTER_DATA.get_texture("alien")
-    if _alien_sprite and _alien_sprite.texture:
-        var tex_size: Vector2 = _alien_sprite.texture.get_size()
-        var factor_x: float = grid_width / tex_size.x if tex_size.x > 0 else 1.0
-        var factor_y: float = grid_height / tex_size.y if tex_size.y > 0 else 1.0
-        var factor: float = min(factor_x, factor_y)
-        _alien_sprite.scale = Vector2(factor, factor)
-
-    if _mech_sprite:
-        _mech_sprite.texture = CHARACTER_DATA.get_texture("mech")
-    if _mech_sprite and _mech_sprite.texture:
-        var tex_size: Vector2 = _mech_sprite.texture.get_size()
-        var factor_x: float = grid_width / tex_size.x if tex_size.x > 0 else 1.0
-        var factor_y: float = grid_height / tex_size.y if tex_size.y > 0 else 1.0
-        var factor: float = min(factor_x, factor_y)
-        _mech_sprite.scale = Vector2(factor, factor)
+func _update_sprite(sprite: Sprite2D, name: String, width: float, height: float) -> void:
+    if sprite == null:
+        return
+    sprite.texture = CHARACTER_DATA.get_texture(name)
+    if sprite.texture:
+        var tex_size: Vector2 = sprite.texture.get_size()
+        var factor_x := width / tex_size.x if tex_size.x > 0 else 1.0
+        var factor_y := height / tex_size.y if tex_size.y > 0 else 1.0
+        var factor := min(factor_x, factor_y)
+        sprite.scale = Vector2(factor, factor)
 
 func _update_creature_positions() -> void:
     if _grids.size() < 2:

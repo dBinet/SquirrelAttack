@@ -46,18 +46,29 @@ static func _to_color(arr: Array) -> Color:
     return Color(r, g, b, a)
 
 static func _draw_circle(img: Image, center: Vector2, radius: int, color: Color) -> void:
-    for x in range(img.get_width()):
-        for y in range(img.get_height()):
-            if center.distance_to(Vector2(x, y)) <= radius:
+    var r2 := float(radius * radius)
+    var min_x := int(center.x - radius)
+    var max_x := int(center.x + radius)
+    var min_y := int(center.y - radius)
+    var max_y := int(center.y + radius)
+    for x in range(min_x, max_x + 1):
+        if x < 0 or x >= img.get_width():
+            continue
+        for y in range(min_y, max_y + 1):
+            if y < 0 or y >= img.get_height():
+                continue
+            var dx := float(x) - center.x
+            var dy := float(y) - center.y
+            if dx * dx + dy * dy <= r2:
                 img.set_pixel(x, y, color)
 
 static func _draw_rect(img: Image, pos: Vector2i, size: Vector2i, color: Color) -> void:
-    for x in range(size.x):
-        for y in range(size.y):
-            var px := pos.x + x
-            var py := pos.y + y
-            if px >= 0 and px < img.get_width() and py >= 0 and py < img.get_height():
-                img.set_pixel(px, py, color)
+    var rect := Rect2i(pos, size)
+    rect.position.x = clamp(rect.position.x, 0, img.get_width())
+    rect.position.y = clamp(rect.position.y, 0, img.get_height())
+    rect.size.x = clamp(rect.size.x, 0, img.get_width() - rect.position.x)
+    rect.size.y = clamp(rect.size.y, 0, img.get_height() - rect.position.y)
+    img.fill_rect(rect, color)
 
 static func _generate_texture(desc: Dictionary) -> ImageTexture:
     var base_size := float(desc.get("size", 64))
