@@ -1,0 +1,19 @@
+{
+    "alien": {
+        "size": 64,
+        "base_color": [0, 0, 0, 0],
+        "shapes": [
+            {"type": "circle", "center": [32, 32], "radius": 30, "color": [0, 1, 0, 1]},
+            {"type": "rect", "position": [20, 20], "size": [6, 6], "color": [0, 0, 0, 1]},
+            {"type": "rect", "position": [38, 20], "size": [6, 6], "color": [0, 0, 0, 1]}
+        ]
+    },
+    "mech": {
+        "size": 64,
+        "base_color": [0.6, 0.6, 0.6, 1],
+        "shapes": [
+            {"type": "rect", "position": [0, 10], "size": [64, 1], "color": [0, 0, 0, 1]},
+            {"type": "rect", "position": [0, 53], "size": [64, 1], "color": [0, 0, 0, 1]}
+        ]
+    }
+}

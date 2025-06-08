@@ -18,6 +18,8 @@ const HAZARDS_PER_ROUND := 4
 var _alien_sprite: Sprite2D
 var _mech_sprite: Sprite2D
 
+const CHARACTER_DATA = preload("res://scripts/CharacterData.gd")
+
 const ATTACK_DATA = preload("res://scripts/AttackData.gd")
 
 const CARD_SCENE := preload("res://scenes/Card.tscn")
@@ -56,12 +58,12 @@ func _ready() -> void:
 
     # Create sprite placeholders for the alien and mech behind the grids
     _alien_sprite = Sprite2D.new()
-    _alien_sprite.texture = _create_alien_texture()
+    _alien_sprite.texture = CHARACTER_DATA.get_texture("alien")
     _alien_sprite.z_index = -1
     add_child(_alien_sprite)
 
     _mech_sprite = Sprite2D.new()
-    _mech_sprite.texture = _create_mech_texture()
+    _mech_sprite.texture = CHARACTER_DATA.get_texture("mech")
     _mech_sprite.z_index = -1
     add_child(_mech_sprite)
 
@@ -208,32 +210,6 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
         _enemy_health -= dmg
     _update_health_labels()
 
-# Generate a simple green circle texture to represent the alien
-func _create_alien_texture() -> ImageTexture:
-    var size := 64
-    var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
-    img.fill(Color(0, 0, 0, 0))
-    var center := Vector2(size / 2, size / 2)
-    var radius := size / 2 - 2
-    for x in range(size):
-        for y in range(size):
-            if center.distance_to(Vector2(x, y)) <= radius:
-                img.set_pixel(x, y, Color(0, 1, 0))
-    for x in range(20, 26):
-        for y in range(20, 26):
-            img.set_pixel(x, y, Color.BLACK)
-            img.set_pixel(size - 1 - x, y, Color.BLACK)
-    return ImageTexture.create_from_image(img)
-
-# Generate a simple gray square texture to represent the mech
-func _create_mech_texture() -> ImageTexture:
-    var size := 64
-    var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
-    img.fill(Color(0.6, 0.6, 0.6))
-    for x in range(size):
-        img.set_pixel(x, 10, Color.BLACK)
-        img.set_pixel(x, size - 11, Color.BLACK)
-    return ImageTexture.create_from_image(img)
 
 func _update_character_scale() -> void:
     var grid_height := Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
