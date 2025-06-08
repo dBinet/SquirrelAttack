@@ -14,7 +14,7 @@ static func _load_data() -> void:
         var json_text := file.get_as_text()
         var data = JSON.parse_string(json_text)
         if typeof(data) == TYPE_DICTIONARY and data.has("attacks"):
-            var arr := data["attacks"]
+            var arr: Array = data["attacks"]
             if arr is Array:
                 for attack in arr:
                     if attack is Array:
