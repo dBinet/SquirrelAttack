@@ -14,11 +14,13 @@ static var _characters: Dictionary = {}
 static var _loaded := false
 static var _bounds: Dictionary = {}
 static var _offsets: Dictionary = {}
+static var _top_left_offsets: Dictionary = {}
 
 static func _check_cell_size() -> void:
     if _last_cell_size != GRID.CELL_SIZE:
         _bounds.clear()
         _offsets.clear()
+        _top_left_offsets.clear()
         _last_cell_size = GRID.CELL_SIZE
 
 static func _load_data() -> void:
@@ -163,6 +165,40 @@ static func get_center_offset(name: String) -> Vector2:
         return _offsets[name]
     get_bounds(name)
     return _offsets.get(name, Vector2.ZERO)
+
+static func get_top_left_offset(name: String) -> Vector2:
+    _load_data()
+    _check_cell_size()
+    if _top_left_offsets.has(name):
+        return _top_left_offsets[name]
+    if not _characters.has(name):
+        return Vector2.ZERO
+    var desc: Dictionary = _characters[name]
+    var scale := float(GRID.CELL_SIZE * GRID.COLS) / float(desc.get("size", 1))
+    var min_x := INF
+    var min_y := INF
+    var shapes: Array = desc.get("shapes", [])
+    if shapes is Array:
+        for s in shapes:
+            if s is Dictionary:
+                match String(s.get("type", "")):
+                    "rect":
+                        var p: Array = s.get("position", [0, 0])
+                        min_x = min(min_x, float(p[0]) * scale)
+                        min_y = min(min_y, float(p[1]) * scale)
+                    "circle":
+                        var c: Array = s.get("center", [0, 0])
+                        var rad: float = float(s.get("radius", 0)) * scale
+                        min_x = min(min_x, float(c[0]) * scale - rad)
+                        min_y = min(min_y, float(c[1]) * scale - rad)
+    if min_x == INF:
+        min_x = 0
+    if min_y == INF:
+        min_y = 0
+    var cell := float(GRID.CELL_SIZE)
+    var offset := Vector2(round(-min_x / cell) * cell, round(-min_y / cell) * cell)
+    _top_left_offsets[name] = offset
+    return offset
 
 static func get_description(name: String) -> Dictionary:
     _load_data()
