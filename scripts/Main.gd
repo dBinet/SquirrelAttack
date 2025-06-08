@@ -258,6 +258,9 @@ func _update_creature_positions() -> void:
     alien_pos.y = round(alien_pos.y / cell) * cell
     mech_pos.x = round(mech_pos.x / cell) * cell
     mech_pos.y = round(mech_pos.y / cell) * cell
+    var bg_offset := Vector2(cell, 6.0 * cell)
+    alien_pos += bg_offset
+    mech_pos += bg_offset
     _alien_sprite.position = alien_pos
     _mech_sprite.position = mech_pos
 
