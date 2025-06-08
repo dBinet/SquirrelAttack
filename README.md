@@ -9,6 +9,8 @@ This repository contains a minimal Godot project for a simple 2D card game proto
 
 ## Getting Started
 1. Open the folder in Godot 4.x.
-2. Run the project to see the empty scene.
+2. Run the project to see the empty scene. The left grid represents the enemy
+   and the right grid is the player. Each side now displays a health counter
+   above its grid.
 
 The project is intentionally minimal and can be extended with gameplay and assets.

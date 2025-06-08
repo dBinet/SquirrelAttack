@@ -5,8 +5,13 @@ var _previous_viewport_size := Vector2.ZERO
 var _grids: Array[Grid] = []
 var _end_button: Button
 var _energy_label: Label
+var _player_health_label: Label
+var _enemy_health_label: Label
 const ENERGY_PER_TURN := 3
 var _energy_available: int = ENERGY_PER_TURN
+const STARTING_HEALTH := 10
+var _player_health: int = STARTING_HEALTH
+var _enemy_health: int = STARTING_HEALTH
 
 const SHAPES := ["I", "L", "O", "T", "S", "Z"]
 const CARD_SCENE := preload("res://scenes/Card.tscn")
@@ -33,6 +38,12 @@ func _ready() -> void:
     _energy_label.position = Vector2(120, 10)
     add_child(_energy_label)
     _update_energy_label()
+
+    _player_health_label = Label.new()
+    add_child(_player_health_label)
+    _enemy_health_label = Label.new()
+    add_child(_enemy_health_label)
+    _update_health_labels()
 
     _add_random_cards()
 
@@ -71,6 +82,7 @@ func _position_grids() -> void:
     var top_y := (viewport_size.y - grid_height) / 2.0 - GRID_VERTICAL_OFFSET
     _grids[0].position = Vector2(start_x, top_y)
     _grids[1].position = Vector2(start_x + grid_width + GRID_MARGIN, top_y)
+    _update_health_label_positions()
 
 func _update_scale() -> void:
     var viewport_size := _previous_viewport_size
@@ -84,7 +96,8 @@ func _update_scale() -> void:
 func on_card_dropped(card: Card) -> bool:
     if _energy_available < card.energy_cost:
         return false
-    for grid in _grids:
+    for idx in range(_grids.size()):
+        var grid = _grids[idx]
         if grid.try_place_piece(card):
             _cards.erase(card)
             card.queue_free()
@@ -92,6 +105,7 @@ func on_card_dropped(card: Card) -> bool:
             _update_energy_label()
             _update_card_positions()
             clear_previews()
+            _apply_damage(idx, card)
             return true
     clear_previews()
     return false
@@ -128,4 +142,26 @@ func _on_EndTurnButton_pressed() -> void:
 func _update_energy_label() -> void:
     if _energy_label:
         _energy_label.text = "Energy: %d/%d" % [_energy_available, ENERGY_PER_TURN]
+
+func _update_health_labels() -> void:
+    if _player_health_label:
+        _player_health_label.text = "HP: %d" % _player_health
+    if _enemy_health_label:
+        _enemy_health_label.text = "HP: %d" % _enemy_health
+
+func _update_health_label_positions() -> void:
+    if _grids.size() < 2:
+        return
+    var grid_width := Grid.COLS * Grid.CELL_SIZE
+    _enemy_health_label.position = _grids[0].position + Vector2(grid_width / 2, -20)
+    _player_health_label.position = _grids[1].position + Vector2(grid_width / 2, -20)
+
+func _apply_damage(grid_idx: int, card: Card) -> void:
+    var blocks := card.SHAPE_DATA.get(card.shape_name, [])
+    var dmg := blocks.size()
+    if grid_idx == 0:
+        _enemy_health -= dmg
+    else:
+        _player_health -= dmg
+    _update_health_labels()
 
