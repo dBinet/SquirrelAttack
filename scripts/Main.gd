@@ -60,11 +60,13 @@ func _ready() -> void:
     _alien_sprite = Sprite2D.new()
     _alien_sprite.texture = CHARACTER_DATA.get_texture("alien")
     _alien_sprite.z_index = -1
+    _alien_sprite.centered = false
     add_child(_alien_sprite)
 
     _mech_sprite = Sprite2D.new()
     _mech_sprite.texture = CHARACTER_DATA.get_texture("mech")
     _mech_sprite.z_index = -1
+    _mech_sprite.centered = false
     add_child(_mech_sprite)
 
     _add_random_cards()
@@ -158,7 +160,7 @@ func _apply_danger_damage() -> void:
     var rect := Rect2()
     if _mech_sprite and _mech_sprite.texture:
         var tex_size := _mech_sprite.texture.get_size() * _mech_sprite.scale
-        rect = Rect2(_mech_sprite.global_position - tex_size / 2.0, tex_size)
+        rect = Rect2(_mech_sprite.global_position, tex_size)
     var dmg := _grids[0].count_uncovered_highlights_in_rect(rect)
     _player_health -= dmg
     _update_health_labels()
@@ -217,8 +219,7 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
         var base_size: float = float(desc.get("size", 1))
         var ratio: float = float(Grid.CELL_SIZE * Grid.COLS) / base_size
         var scale_factor: float = _alien_sprite.scale.x
-        var sprite_size := _alien_sprite.texture.get_size() * _alien_sprite.scale
-        var sprite_top_left := _alien_sprite.global_position - sprite_size / 2.0
+        var sprite_top_left := _alien_sprite.global_position
         var blocks: Array[Vector2] = card.get_global_block_positions()
         for b in blocks:
             var block_rect := Rect2(b, Vector2(Grid.CELL_SIZE, Grid.CELL_SIZE))
@@ -248,12 +249,10 @@ func _update_sprite(sprite: Sprite2D, name: String, width: float, height: float)
 func _update_creature_positions() -> void:
     if _grids.size() < 2:
         return
-    var grid_width := Grid.COLS * Grid.CELL_SIZE
-    var grid_height := Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
-    var alien_off: Vector2 = CHARACTER_DATA.get_center_offset("alien") * _alien_sprite.scale.x
-    var mech_off: Vector2 = CHARACTER_DATA.get_center_offset("mech") * _mech_sprite.scale.x
-    var alien_pos := _grids[1].position + Vector2(grid_width / 2, grid_height / 2) + alien_off
-    var mech_pos := _grids[0].position + Vector2(grid_width / 2, grid_height / 2) + mech_off
+    var alien_off: Vector2 = CHARACTER_DATA.get_top_left_offset("alien") * _alien_sprite.scale.x
+    var mech_off: Vector2 = CHARACTER_DATA.get_top_left_offset("mech") * _mech_sprite.scale.x
+    var alien_pos := _grids[1].position + alien_off
+    var mech_pos := _grids[0].position + mech_off
     var cell := float(Grid.CELL_SIZE)
     alien_pos.x = round(alien_pos.x / cell) * cell
     alien_pos.y = round(alien_pos.y / cell) * cell
