@@ -22,7 +22,7 @@ static func set_cell_size(new_size: float) -> void:
             if grid is Grid:
                 grid.queue_redraw()
 
-var cells: Array[Array[bool]] = []
+var cells: Array = []
 var preview_cells: Array[Vector2i] = []
 
 func _get_piece_indices(card: Node) -> Array[Vector2i]:
