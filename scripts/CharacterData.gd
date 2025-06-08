@@ -138,7 +138,10 @@ static func get_bounds(name: String) -> Vector2:
 
     var img_size: float = float(GRID.CELL_SIZE * GRID.COLS)
     var center := Vector2((min_x + max_x) / 2.0, (min_y + max_y) / 2.0)
-    var offset := Vector2(img_size / 2.0 - center.x, img_size / 2.0 - center.y)
+    var raw_offset := Vector2(img_size / 2.0 - center.x, img_size / 2.0 - center.y)
+    var cell := float(GRID.CELL_SIZE)
+    var offset := Vector2(round(raw_offset.x / cell) * cell,
+        round(raw_offset.y / cell) * cell)
     _offsets[name] = offset
     return size
 
