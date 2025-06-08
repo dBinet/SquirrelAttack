@@ -180,7 +180,5 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
     var dmg: int = blocks.size()
     if grid_idx == 0:
         _enemy_health -= dmg
-    else:
-        _player_health -= dmg
     _update_health_labels()
 

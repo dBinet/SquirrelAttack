@@ -13,6 +13,8 @@ This repository contains a minimal Godot project for a simple 2D card game proto
    and the right grid is the player. Each side now displays a health counter
    above its grid. At the start of each turn, four random squares on the
    player's grid light up. Any lit square left uncovered when the "End Turn"
-   button is pressed causes one point of damage to the player.
+   button is pressed causes one point of damage to the player. Placing pieces
+   on the player's grid does not reduce health directly; damage only comes from
+   these uncovered hazard squares.
 
 The project is intentionally minimal and can be extended with gameplay and assets.
