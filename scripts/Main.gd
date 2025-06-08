@@ -14,15 +14,17 @@ var _player_health: int = STARTING_HEALTH
 var _enemy_health: int = STARTING_HEALTH
 const HAZARDS_PER_ROUND := 4
 
-const SHAPES := ["I", "L", "O", "T", "S", "Z"]
 const CARD_SCENE := preload("res://scenes/Card.tscn")
 const BOTTOM_MARGIN := 10.0
 const GRID_MARGIN := 20.0
 const GRID_VERTICAL_OFFSET := 50.0
 const GRID_VERTICAL_SCALE := 0.9
 
+var _shape_names: Array[String] = []
+
 func _ready() -> void:
     randomize()
+    _shape_names = ShapeData.get_shape_names()
     _previous_viewport_size = get_viewport_rect().size
     _grids = [get_node("LeftGrid"), get_node("RightGrid")]
     for g in _grids:
@@ -139,10 +141,13 @@ func _discard_remaining_cards() -> void:
     _cards.clear()
 
 func _add_random_cards(num: int = 5) -> void:
+    if _shape_names.is_empty():
+        _shape_names = ShapeData.get_shape_names()
     for i in range(num):
-        var shape_idx := randi_range(0, SHAPES.size() - 1)
+        var shape_idx := randi_range(0, _shape_names.size() - 1)
         var card := CARD_SCENE.instantiate()
-        card.shape_name = SHAPES[shape_idx]
+        card.shape_name = _shape_names[shape_idx]
+        card.energy_cost = ShapeData.get_energy_cost(card.shape_name)
         add_child(card)
         _cards.append(card)
 
@@ -174,9 +179,7 @@ func _update_health_label_positions() -> void:
     _player_health_label.position = _grids[1].position + Vector2(grid_width / 2, -20)
 
 func _apply_damage(grid_idx: int, card: Card) -> void:
-    var shape_blocks: Array = card.SHAPE_DATA.get(card.shape_name, [])
-    var blocks: Array[Vector2] = []
-    blocks.assign(shape_blocks)
+    var blocks: Array[Vector2] = ShapeData.get_blocks(card.shape_name)
     var dmg: int = blocks.size()
     if grid_idx == 0:
         _enemy_health -= dmg
