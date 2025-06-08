@@ -1,11 +1,12 @@
 extends Node2D
+
 class_name Card
 
 var card_name: String = ""
 var value: int = 1
 
 # Amount of energy required to play this card
-const energy_cost: int = 1
+var energy_cost: int = 1
 
 # Name of the tetris shape for this card
 var shape_name: String = "L"
@@ -43,18 +44,6 @@ var original_position: Vector2
 var is_dragging := false
 var drag_offset := Vector2.ZERO
 var shape_bounds := Rect2()
-## Dictionary containing the coordinates for each tetromino.
-# Using `var` instead of `const` avoids the constant-expression error when
-# running on versions of Godot that do not treat `Vector2` constructors as
-# compile-time constants.
-var SHAPE_DATA := {
-    "I": [Vector2(0,0), Vector2(1,0), Vector2(2,0), Vector2(3,0)],
-    "L": [Vector2(0,0), Vector2(0,1), Vector2(0,2), Vector2(1,2)],
-    "O": [Vector2(0,0), Vector2(1,0), Vector2(0,1), Vector2(1,1)],
-    "T": [Vector2(1,0), Vector2(0,1), Vector2(1,1), Vector2(2,1)],
-    "S": [Vector2(1,0), Vector2(2,0), Vector2(0,1), Vector2(1,1)],
-    "Z": [Vector2(0,0), Vector2(1,0), Vector2(1,1), Vector2(2,1)]
-}
 
 func _ready() -> void:
     original_position = position
@@ -64,6 +53,7 @@ func _ready() -> void:
     if cost_label == null:
         cost_label = Label.new()
         add_child(cost_label)
+    energy_cost = ShapeData.get_energy_cost(shape_name)
     cost_label.text = str(energy_cost)
     cost_label.z_index = 1
     cost_label.add_theme_color_override("font_color", Color.BLACK)
@@ -106,9 +96,9 @@ func _process(delta: float) -> void:
             parent.preview_card_drag(self)
 
 func _update_textures() -> void:
-    var shape_blocks: Array = SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
-    var blocks: Array[Vector2] = []
-    blocks.assign(shape_blocks)
+    var blocks: Array[Vector2] = ShapeData.get_blocks(shape_name)
+    if blocks.is_empty():
+        blocks = ShapeData.get_blocks("L")
     shape_bounds = _get_shape_bounds(blocks)
     card_texture = _create_card_texture(blocks, shape_bounds)
     piece_texture = _create_piece_texture(blocks, shape_bounds)
@@ -182,7 +172,9 @@ func _is_in_bottom_third() -> bool:
     return original_position.y > viewport_size.y * 2.0 / 3.0
 
 func get_global_block_positions() -> Array[Vector2]:
-    var blocks: Array = SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
+    var blocks: Array[Vector2] = ShapeData.get_blocks(shape_name)
+    if blocks.is_empty():
+        blocks = ShapeData.get_blocks("L")
     var top_left := position - size / 2.0
     var positions: Array[Vector2] = []
     for b in blocks:

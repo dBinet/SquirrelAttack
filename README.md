@@ -6,6 +6,7 @@ This repository contains a minimal Godot project for a simple 2D card game proto
 - `project.godot` – Godot project configuration.
 - `scenes/` – Godot scene files including the main scene and a basic card scene.
 - `scripts/` – GDScript files for the main scene and card logic.
+- `data/shapes.json` – Available piece shapes and their energy costs.
 
 ## Getting Started
 1. Open the folder in Godot 4.x.
