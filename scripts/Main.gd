@@ -286,9 +286,9 @@ func _shapes_overlap_rect(shapes: Array, top_left: Vector2, ratio: float, scale:
     return false
 
 func _circle_intersects_rect(center: Vector2, radius: float, rect: Rect2) -> bool:
-    var closest_x := clamp(center.x, rect.position.x, rect.position.x + rect.size.x)
-    var closest_y := clamp(center.y, rect.position.y, rect.position.y + rect.size.y)
-    var dx := center.x - closest_x
-    var dy := center.y - closest_y
+    var closest_x: float = clamp(center.x, rect.position.x, rect.position.x + rect.size.x)
+    var closest_y: float = clamp(center.y, rect.position.y, rect.position.y + rect.size.y)
+    var dx: float = center.x - closest_x
+    var dy: float = center.y - closest_y
     return dx * dx + dy * dy <= radius * radius
 
