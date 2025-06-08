@@ -15,7 +15,7 @@ const GRID_MARGIN := 20.0
 const GRID_VERTICAL_OFFSET := 50.0
 const GRID_VERTICAL_SCALE := 0.9
 
-func _ready():
+func _ready() -> void:
     randomize()
     _previous_viewport_size = get_viewport_rect().size
     _grids = [get_node("LeftGrid"), get_node("RightGrid")]
@@ -40,7 +40,7 @@ func _ready():
     _update_card_positions()
     _position_grids()
 
-func _process(delta):
+func _process(delta: float) -> void:
     var current_size := get_viewport_rect().size
     if current_size != _previous_viewport_size:
         _previous_viewport_size = current_size
@@ -48,7 +48,7 @@ func _process(delta):
         _update_card_positions()
         _position_grids()
 
-func _update_card_positions():
+func _update_card_positions() -> void:
     var viewport_size := _previous_viewport_size
     var num_cards := _cards.size()
     var spacing := viewport_size.x / (num_cards + 1)
@@ -60,7 +60,7 @@ func _update_card_positions():
         card.position = Vector2(spacing * (i + 1), bottom_y)
         card.set_original_position()
 
-func _position_grids():
+func _position_grids() -> void:
     if _grids.size() < 2:
         return
     var viewport_size := _previous_viewport_size
@@ -72,14 +72,12 @@ func _position_grids():
     _grids[0].position = Vector2(start_x, top_y)
     _grids[1].position = Vector2(start_x + grid_width + GRID_MARGIN, top_y)
 
-func _update_scale():
+func _update_scale() -> void:
     var viewport_size := _previous_viewport_size
     var horiz := (viewport_size.x - GRID_MARGIN) / (Grid.COLS * 2)
     var base_ratio := Card.BASE_CARD_HEIGHT / Card.BASE_BLOCK_SIZE
     var vert := (viewport_size.y - GRID_VERTICAL_OFFSET * 2 - BOTTOM_MARGIN) / (Grid.ROWS * GRID_VERTICAL_SCALE + base_ratio)
-    var new_size: int = int(floor(min(horiz, vert)))
-    if new_size <= 0:
-        new_size = 1
+    var new_size: int = max(1, int(floor(min(horiz, vert))))
     Grid.set_cell_size(new_size)
     Card.update_scale(new_size)
 

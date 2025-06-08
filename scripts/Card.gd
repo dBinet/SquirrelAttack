@@ -34,7 +34,7 @@ static func update_scale(new_cell_size: float) -> void:
             if c is Card:
                 c._update_textures()
 
-var size := Vector2(card_width, card_height)
+var size: Vector2 = Vector2(card_width, card_height)
 var card_texture: ImageTexture
 var piece_texture: ImageTexture
 var piece_size: Vector2
@@ -56,7 +56,7 @@ var SHAPE_DATA := {
     "Z": [Vector2(0,0), Vector2(1,0), Vector2(1,1), Vector2(2,1)]
 }
 
-func _ready():
+func _ready() -> void:
     original_position = position
     sprite = Sprite2D.new()
     add_child(sprite)
@@ -71,10 +71,10 @@ func _ready():
     sprite.texture = card_texture
     sprite.centered = true
 
-func set_original_position():
+func set_original_position() -> void:
     original_position = position
 
-func _input(event):
+func _input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
         var mouse_pos = get_global_mouse_position()
         var rect = Rect2(position - size / 2, size)
@@ -98,33 +98,32 @@ func _input(event):
             if parent and parent.has_method("clear_previews"):
                 parent.clear_previews()
 
-func _process(delta):
+func _process(delta: float) -> void:
     if is_dragging:
         position = get_global_mouse_position() + drag_offset
         var parent = get_parent()
         if parent and parent.has_method("preview_card_drag"):
             parent.preview_card_drag(self)
 
-func _update_textures():
+func _update_textures() -> void:
     var shape_blocks: Array = SHAPE_DATA.get(shape_name, SHAPE_DATA["L"])
     var blocks: Array[Vector2] = []
     blocks.assign(shape_blocks)
     shape_bounds = _get_shape_bounds(blocks)
-    card_texture = _create_card_texture(blocks)
-    piece_texture = _create_piece_texture(blocks)
+    card_texture = _create_card_texture(blocks, shape_bounds)
+    piece_texture = _create_piece_texture(blocks, shape_bounds)
     size = Vector2(card_width, card_height)
     if cost_label:
         cost_label.position = Vector2(-size.x / 2 + 5, -size.y / 2 + 5)
         cost_label.add_theme_font_size_override("font_size", int(block_size))
 
-func _create_card_texture(blocks: Array[Vector2]) -> ImageTexture:
+func _create_card_texture(blocks: Array[Vector2], bounds: Rect2) -> ImageTexture:
     var width := card_width
     var height := card_height
     var img := Image.create(width, height, false, Image.FORMAT_RGBA8)
     img.fill(Color(1, 1, 1, 1))
     var black := Color(0, 0, 0, 1)
 
-    var bounds := _get_shape_bounds(blocks)
     var shape_w := int(bounds.size.x) * block_size
     var shape_h := int(bounds.size.y) * block_size
     var start_x := int((width - shape_w) / 2) - int(bounds.position.x) * block_size
@@ -139,8 +138,7 @@ func _create_card_texture(blocks: Array[Vector2]) -> ImageTexture:
 
     return ImageTexture.create_from_image(img)
 
-func _create_piece_texture(blocks: Array[Vector2]) -> ImageTexture:
-    var bounds := _get_shape_bounds(blocks)
+func _create_piece_texture(blocks: Array[Vector2], bounds: Rect2) -> ImageTexture:
     var width := int(bounds.size.x) * block_size
     var height := int(bounds.size.y) * block_size
     var img := Image.create(width, height, false, Image.FORMAT_RGBA8)
@@ -167,13 +165,13 @@ func _get_shape_bounds(blocks: Array[Vector2]) -> Rect2:
         max_y = max(max_y, b.y)
     return Rect2(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
 
-func _transform_to_piece():
+func _transform_to_piece() -> void:
     sprite.texture = piece_texture
     size = piece_size
     is_transformed = true
     sprite.modulate = Color(1, 1, 1, 0.5)
 
-func _transform_to_card():
+func _transform_to_card() -> void:
     sprite.texture = card_texture
     size = Vector2(card_width, card_height)
     is_transformed = false
