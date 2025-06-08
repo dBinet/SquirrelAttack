@@ -21,9 +21,12 @@ static func get_shapes() -> Dictionary:
     _load_data()
     return _shapes
 
-static func get_shape_names() -> Array:
+static func get_shape_names() -> Array[String]:
     _load_data()
-    return _shapes.keys()
+    var names: Array[String] = []
+    for n in _shapes.keys():
+        names.append(String(n))
+    return names
 
 static func get_blocks(name: String) -> Array[Vector2]:
     _load_data()
