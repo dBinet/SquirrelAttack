@@ -131,6 +131,13 @@ func highlight_random_cells(num: int) -> void:
             danger_cells.append(c)
     queue_redraw()
 
+func highlight_attack(cells_to_highlight: Array[Vector2i]) -> void:
+    danger_cells.clear()
+    for c in cells_to_highlight:
+        if c.x >= 0 and c.x < COLS and c.y >= 0 and c.y < ROWS:
+            danger_cells.append(c)
+    queue_redraw()
+
 func clear_highlights() -> void:
     if danger_cells.is_empty():
         return
