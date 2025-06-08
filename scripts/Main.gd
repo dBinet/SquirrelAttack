@@ -221,15 +221,15 @@ func _update_character_scale() -> void:
 
     if _alien_sprite and _alien_sprite.texture:
         var bounds: Vector2 = CHARACTER_DATA.get_bounds("alien")
-        var factor_x: float = bounds.x > 0 ? grid_width / bounds.x : 1.0
-        var factor_y: float = bounds.y > 0 ? grid_height / bounds.y : 1.0
+        var factor_x: float = grid_width / bounds.x if bounds.x > 0 else 1.0
+        var factor_y: float = grid_height / bounds.y if bounds.y > 0 else 1.0
         var factor: float = min(factor_x, factor_y)
         _alien_sprite.scale = Vector2(factor, factor)
 
     if _mech_sprite and _mech_sprite.texture:
         var bounds: Vector2 = CHARACTER_DATA.get_bounds("mech")
-        var factor_x: float = bounds.x > 0 ? grid_width / bounds.x : 1.0
-        var factor_y: float = bounds.y > 0 ? grid_height / bounds.y : 1.0
+        var factor_x: float = grid_width / bounds.x if bounds.x > 0 else 1.0
+        var factor_y: float = grid_height / bounds.y if bounds.y > 0 else 1.0
         var factor: float = min(factor_x, factor_y)
         _mech_sprite.scale = Vector2(factor, factor)
 

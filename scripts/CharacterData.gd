@@ -83,8 +83,8 @@ static func get_bounds(name: String) -> Vector2:
     if not _characters.has(name):
         return Vector2.ZERO
     var desc: Dictionary = _characters[name]
-    var min_x := desc.get("size", 0)
-    var min_y := desc.get("size", 0)
+    var min_x := float(desc.get("size", 0))
+    var min_y := float(desc.get("size", 0))
     var max_x := 0
     var max_y := 0
     var shapes: Array = desc.get("shapes", [])
