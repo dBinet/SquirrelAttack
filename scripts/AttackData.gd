@@ -3,7 +3,7 @@ class_name AttackData
 
 const ATTACKS_FILE := "res://data/attacks.json"
 
-static var _attacks: Array[Array[Vector2i]] = []
+static var _attacks: Array = []
 static var _loaded: bool = false
 
 static func _load_data() -> void:
