@@ -49,20 +49,20 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
     var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
     var base_col := _to_color(desc.get("base_color", [0, 0, 0, 0]))
     img.fill(base_col)
-    var shapes := desc.get("shapes", [])
+    var shapes: Array = desc.get("shapes", [])
     if shapes is Array:
         for s in shapes:
             if s is Dictionary:
                 var col := _to_color(s.get("color", [1, 1, 1, 1]))
                 match String(s.get("type", "")):
                     "circle":
-                        var c_arr := s.get("center", [size / 2, size / 2])
+                        var c_arr: Array = s.get("center", [size / 2, size / 2])
                         var ctr := Vector2(float(c_arr[0]), float(c_arr[1]))
                         var rad := int(s.get("radius", 0))
                         _draw_circle(img, ctr, rad, col)
                     "rect":
-                        var p_arr := s.get("position", [0, 0])
-                        var sz_arr := s.get("size", [1, 1])
+                        var p_arr: Array = s.get("position", [0, 0])
+                        var sz_arr: Array = s.get("size", [1, 1])
                         var pos := Vector2i(int(p_arr[0]), int(p_arr[1]))
                         var sz := Vector2i(int(sz_arr[0]), int(sz_arr[1]))
                         _draw_rect(img, pos, sz, col)
