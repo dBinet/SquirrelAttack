@@ -5,6 +5,8 @@ const CHARACTERS_FILE := "res://data/characters.json"
 
 static var _characters: Dictionary = {}
 static var _loaded := false
+static var _bounds: Dictionary = {}
+static var _offsets: Dictionary = {}
 
 static func _load_data() -> void:
     if _loaded:
@@ -73,3 +75,57 @@ static func get_texture(name: String) -> ImageTexture:
     if _characters.has(name):
         return _generate_texture(_characters[name])
     return ImageTexture.new()
+
+static func get_bounds(name: String) -> Vector2:
+    _load_data()
+    if _bounds.has(name):
+        return _bounds[name]
+    if not _characters.has(name):
+        return Vector2.ZERO
+    var desc: Dictionary = _characters[name]
+    var min_x := desc.get("size", 0)
+    var min_y := desc.get("size", 0)
+    var max_x := 0
+    var max_y := 0
+    var shapes: Array = desc.get("shapes", [])
+    if shapes is Array:
+        for s in shapes:
+            if s is Dictionary:
+                match String(s.get("type", "")):
+                    "rect":
+                        var p: Array = s.get("position", [0, 0])
+                        var sz: Array = s.get("size", [0, 0])
+                        var x0: float = float(p[0])
+                        var y0: float = float(p[1])
+                        var x1: float = x0 + float(sz[0])
+                        var y1: float = y0 + float(sz[1])
+                        min_x = min(min_x, x0)
+                        min_y = min(min_y, y0)
+                        max_x = max(max_x, x1)
+                        max_y = max(max_y, y1)
+                    "circle":
+                        var ctr: Array = s.get("center", [0, 0])
+                        var rad: float = float(s.get("radius", 0))
+                        var x0 := float(ctr[0]) - rad
+                        var y0 := float(ctr[1]) - rad
+                        var x1 := float(ctr[0]) + rad
+                        var y1 := float(ctr[1]) + rad
+                        min_x = min(min_x, x0)
+                        min_y = min(min_y, y0)
+                        max_x = max(max_x, x1)
+                        max_y = max(max_y, y1)
+    var size := Vector2(max_x - min_x, max_y - min_y)
+    _bounds[name] = size
+
+    var img_size: float = float(desc.get("size", 0))
+    var center := Vector2((min_x + max_x) / 2.0, (min_y + max_y) / 2.0)
+    var offset := Vector2(img_size / 2.0 - center.x, img_size / 2.0 - center.y)
+    _offsets[name] = offset
+    return size
+
+static func get_center_offset(name: String) -> Vector2:
+    _load_data()
+    if _offsets.has(name):
+        return _offsets[name]
+    get_bounds(name)
+    return _offsets.get(name, Vector2.ZERO)
