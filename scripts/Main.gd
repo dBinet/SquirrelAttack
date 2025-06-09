@@ -218,13 +218,13 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
         var shapes: Array = desc.get("shapes", [])
         var base_size: float = float(desc.get("size", 1))
         var ratio: float = float(Grid.CELL_SIZE * Grid.COLS) / base_size
-        var scale_factor: float = _alien_sprite.scale.x
-        var tex_size: Vector2 = _alien_sprite.texture.get_size() * scale_factor
+        var sprite_scale := Vector2(_alien_sprite.scale.x, _alien_sprite.scale.y)
+        var tex_size: Vector2 = _alien_sprite.texture.get_size() * sprite_scale
         var sprite_top_left := _alien_sprite.global_position - tex_size / 2.0
         var blocks: Array[Vector2] = card.get_global_block_positions()
         for b in blocks:
             var block_rect := Rect2(b, Vector2(Grid.CELL_SIZE, Grid.CELL_SIZE))
-            if _shapes_overlap_rect(shapes, sprite_top_left, ratio, scale_factor, block_rect):
+            if _shapes_overlap_rect(shapes, sprite_top_left, ratio, sprite_scale, block_rect):
                 dmg += 1
         _enemy_health -= dmg
     _update_health_labels()
@@ -240,12 +240,13 @@ func _update_sprite(sprite: Sprite2D, name: String, width: float, height: float)
     if sprite == null:
         return
     sprite.texture = CHARACTER_DATA.get_texture(name)
+    sprite.offset = CHARACTER_DATA.get_center_offset(name)
     if sprite.texture:
         var tex_size: Vector2 = sprite.texture.get_size()
         var factor_x := width / tex_size.x if tex_size.x > 0 else 1.0
         var factor_y := height / tex_size.y if tex_size.y > 0 else 1.0
         var factor: float = min(factor_x, factor_y)
-        sprite.scale = Vector2(factor, factor)
+        sprite.scale = Vector2(factor, factor * GRID_VERTICAL_SCALE)
 
 func _update_creature_positions() -> void:
     if _grids.size() < 2:
@@ -257,22 +258,22 @@ func _update_creature_positions() -> void:
     _mech_sprite.position = left_center
     _alien_sprite.position = right_center
 
-func _shapes_overlap_rect(shapes: Array, top_left: Vector2, ratio: float, scale: float, rect: Rect2) -> bool:
+func _shapes_overlap_rect(shapes: Array, top_left: Vector2, ratio: float, scale: Vector2, rect: Rect2) -> bool:
     for s in shapes:
         if s is Dictionary:
             match String(s.get("type", "")):
                 "rect":
                     var p: Array = s.get("position", [0, 0])
                     var sz: Array = s.get("size", [0, 0])
-                    var pos := top_left + Vector2(float(p[0]) * ratio, float(p[1]) * ratio) * scale
-                    var size := Vector2(float(sz[0]) * ratio, float(sz[1]) * ratio) * scale
+                    var pos := top_left + Vector2(float(p[0]) * ratio * scale.x, float(p[1]) * ratio * scale.y)
+                    var size := Vector2(float(sz[0]) * ratio * scale.x, float(sz[1]) * ratio * scale.y)
                     if Rect2(pos, size).intersects(rect):
                         return true
                 "circle":
                     var c: Array = s.get("center", [0, 0])
                     var rad: float = float(s.get("radius", 0))
-                    var ctr := top_left + Vector2(float(c[0]) * ratio, float(c[1]) * ratio) * scale
-                    var r := rad * ratio * scale
+                    var ctr := top_left + Vector2(float(c[0]) * ratio * scale.x, float(c[1]) * ratio * scale.y)
+                    var r := rad * ratio * max(scale.x, scale.y)
                     if _circle_intersects_rect(ctr, r, rect):
                         return true
     return false
