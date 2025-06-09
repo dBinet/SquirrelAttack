@@ -76,10 +76,43 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
     var base_size := float(desc.get("size", 64))
     var size := int(GRID.CELL_SIZE * GRID.COLS)
     var ratio := float(size) / base_size
+
+    var min_x := 0.0
+    var min_y := 0.0
+    var shapes: Array = desc.get("shapes", [])
+    if shapes is Array:
+        var first := true
+        for s in shapes:
+            if s is Dictionary:
+                match String(s.get("type", "")):
+                    "rect":
+                        var p: Array = s.get("position", [0, 0])
+                        if first:
+                            min_x = float(p[0])
+                            min_y = float(p[1])
+                            first = false
+                        else:
+                            min_x = min(min_x, float(p[0]))
+                            min_y = min(min_y, float(p[1]))
+                    "circle":
+                        var c: Array = s.get("center", [0, 0])
+                        var rad: float = float(s.get("radius", 0))
+                        var cx := float(c[0]) - rad
+                        var cy := float(c[1]) - rad
+                        if first:
+                            min_x = cx
+                            min_y = cy
+                            first = false
+                        else:
+                            min_x = min(min_x, cx)
+                            min_y = min(min_y, cy)
+
+    var offset_x := -min(0.0, min_x)
+    var offset_y := -min(0.0, min_y)
+
     var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
     var base_col := _to_color(desc.get("base_color", [0, 0, 0, 0]))
     img.fill(base_col)
-    var shapes: Array = desc.get("shapes", [])
     if shapes is Array:
         for s in shapes:
             if s is Dictionary:
@@ -87,13 +120,13 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
                 match String(s.get("type", "")):
                     "circle":
                         var c_arr: Array = s.get("center", [size / 2, size / 2])
-                        var ctr := Vector2(float(c_arr[0]) * ratio, float(c_arr[1]) * ratio)
+                        var ctr := Vector2((float(c_arr[0]) + offset_x) * ratio, (float(c_arr[1]) + offset_y) * ratio)
                         var rad := int(float(s.get("radius", 0)) * ratio)
                         _draw_circle(img, ctr, rad, col)
                     "rect":
                         var p_arr: Array = s.get("position", [0, 0])
                         var sz_arr: Array = s.get("size", [1, 1])
-                        var pos := Vector2i(int(round(float(p_arr[0]) * ratio)), int(round(float(p_arr[1]) * ratio)))
+                        var pos := Vector2i(int(round((float(p_arr[0]) + offset_x) * ratio)), int(round((float(p_arr[1]) + offset_y) * ratio)))
                         var sz := Vector2i(int(round(float(sz_arr[0]) * ratio)), int(round(float(sz_arr[1]) * ratio)))
                         _draw_rect(img, pos, sz, col)
     return ImageTexture.create_from_image(img)
@@ -115,10 +148,10 @@ static func get_bounds(name: String) -> Vector2:
     var desc: Dictionary = _characters[name]
     var scale := float(GRID.CELL_SIZE * GRID.COLS) / float(desc.get("size", 1))
     var size_px := float(GRID.CELL_SIZE * GRID.COLS)
-    var min_x := size_px
-    var min_y := size_px
-    var max_x := 0
-    var max_y := 0
+    var min_x := INF
+    var min_y := INF
+    var max_x := -INF
+    var max_y := -INF
     var shapes: Array = desc.get("shapes", [])
     if shapes is Array:
         for s in shapes:
@@ -146,11 +179,20 @@ static func get_bounds(name: String) -> Vector2:
                         min_y = min(min_y, y0)
                         max_x = max(max_x, x1)
                         max_y = max(max_y, y1)
+    if min_x == INF:
+        min_x = 0
+    if min_y == INF:
+        min_y = 0
+
+    var translation_x := -min(0.0, min_x)
+    var translation_y := -min(0.0, min_y)
+
     var size := Vector2(max_x - min_x, max_y - min_y)
     _bounds[name] = size
 
     var img_size: float = float(GRID.CELL_SIZE * GRID.COLS)
-    var center := Vector2((min_x + max_x) / 2.0, (min_y + max_y) / 2.0)
+    var center := Vector2((min_x + max_x) / 2.0 + translation_x,
+        (min_y + max_y) / 2.0 + translation_y)
     var raw_offset := Vector2(img_size / 2.0 - center.x, img_size / 2.0 - center.y)
     var cell := float(GRID.CELL_SIZE)
     var offset := Vector2(round(raw_offset.x / cell) * cell,
@@ -195,8 +237,10 @@ static func get_top_left_offset(name: String) -> Vector2:
         min_x = 0
     if min_y == INF:
         min_y = 0
+    var translation_x := -min(0.0, min_x)
+    var translation_y := -min(0.0, min_y)
     var cell := float(GRID.CELL_SIZE)
-    var offset := Vector2(round(-min_x / cell) * cell, round(-min_y / cell) * cell)
+    var offset := Vector2(round(translation_x / cell) * cell, round(translation_y / cell) * cell)
     _top_left_offsets[name] = offset
     return offset
 
