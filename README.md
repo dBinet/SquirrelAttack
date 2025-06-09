@@ -9,6 +9,8 @@ This repository contains a minimal Godot project for a simple 2D card game proto
 - `data/shapes.json` – Available piece shapes and their energy costs.
 - `data/attacks.json` – Predefined 4-cell attack patterns used each turn.
 - `data/characters.json` – Simple pixel art descriptions for the alien and mech.
+  Each entry can optionally include an `outline_color` array used when drawing
+  the sprite.
 
 ## Getting Started
 1. Open the folder in Godot 4.x.
