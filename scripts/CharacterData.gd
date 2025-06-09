@@ -139,41 +139,9 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
     var size := int(GRID.CELL_SIZE * GRID.COLS)
     var ratio := float(size) / base_size
 
-    var min_x := 0.0
-    var min_y := 0.0
     var shapes: Array = _extract_all_shapes(desc.get("shapes", []))
-    if shapes.size() > 0:
-        var first := true
-        for s in shapes:
-            match String(s.get("type", "")):
-                "rect":
-                    var p: Array = s.get("position", [0, 0])
-                    if first:
-                        min_x = float(p[0])
-                        min_y = float(p[1])
-                        first = false
-                    else:
-                        min_x = min(min_x, float(p[0]))
-                        min_y = min(min_y, float(p[1]))
-                "circle":
-                    var c: Array = s.get("center", [0, 0])
-                    var rad: float = float(s.get("radius", 0))
-                    var cx := float(c[0]) - rad
-                    var cy := float(c[1]) - rad
-                    if first:
-                        min_x = cx
-                        min_y = cy
-                        first = false
-                    else:
-                        min_x = min(min_x, cx)
-                        min_y = min(min_y, cy)
-
-    # Always translate shapes so the minimum coordinates line up with (0, 0).
-    # This means the top-left corner of the final texture corresponds to
-    # the smallest x and y values found in the description regardless of
-    # whether they are positive or negative.
-    var offset_x: float = -float(min_x)
-    var offset_y: float = -float(min_y)
+    var offset_x: float = 0.0
+    var offset_y: float = 0.0
 
     var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
     var base_col := _to_color(desc.get("base_color", [0, 0, 0, 0]))
@@ -214,10 +182,8 @@ static func get_bounds(name: String) -> Vector2:
     var desc: Dictionary = _characters[name]
     var scale := float(GRID.CELL_SIZE * GRID.COLS) / float(desc.get("size", 1))
     var size_px := float(GRID.CELL_SIZE * GRID.COLS)
-    var min_x := INF
-    var min_y := INF
-    var max_x := -INF
-    var max_y := -INF
+    var max_x := 0.0
+    var max_y := 0.0
     var shapes: Array = _extract_all_shapes(desc.get("shapes", []))
     if shapes.size() > 0:
         for s in shapes:
@@ -225,46 +191,23 @@ static func get_bounds(name: String) -> Vector2:
                 "rect":
                     var p: Array = s.get("position", [0, 0])
                     var sz: Array = s.get("size", [0, 0])
-                    var x_pos: float = float(p[0]) * scale
-                    var y_pos: float = float(p[1]) * scale
-                    var x_end: float = x_pos + float(sz[0]) * scale
-                    var y_end: float = y_pos + float(sz[1]) * scale
-                    min_x = min(min_x, x_pos)
-                    min_y = min(min_y, y_pos)
-                    max_x = max(max_x, x_pos) # ignore width for centering
-                    max_y = max(max_y, y_pos)
-                    # ensure entire rect fits inside the image when size is negative
-                    if float(sz[0]) < 0:
-                        min_x = min(min_x, x_end)
-                    if float(sz[1]) < 0:
-                        min_y = min(min_y, y_end)
+                    var x_end: float = (float(p[0]) + float(sz[0])) * scale
+                    var y_end: float = (float(p[1]) + float(sz[1])) * scale
+                    max_x = max(max_x, x_end)
+                    max_y = max(max_y, y_end)
                 "circle":
                     var ctr: Array = s.get("center", [0, 0])
                     var rad: float = float(s.get("radius", 0)) * scale
-                    var cx := float(ctr[0]) * scale
-                    var cy := float(ctr[1]) * scale
-                    var x0 := cx - rad
-                    var y0 := cy - rad
-                    min_x = min(min_x, x0)
-                    min_y = min(min_y, y0)
-                    max_x = max(max_x, cx) # ignore radius for centering
-                    max_y = max(max_y, cy)
-    if min_x == INF:
-        min_x = 0
-    if min_y == INF:
-        min_y = 0
+                    var x_end: float = float(ctr[0]) * scale + rad
+                    var y_end: float = float(ctr[1]) * scale + rad
+                    max_x = max(max_x, x_end)
+                    max_y = max(max_y, y_end)
 
-    # Offset so the minimum coordinates align with the origin. This keeps the
-    # sprite anchored with its top-left corner at (0, 0).
-    var translation_x: float = -float(min_x)
-    var translation_y: float = -float(min_y)
-
-    var size := Vector2(max_x - min_x, max_y - min_y)
+    var size := Vector2(max_x, max_y)
     _bounds[name] = size
 
     var img_size: float = float(GRID.CELL_SIZE * GRID.COLS)
-    var center := Vector2((min_x + max_x) / 2.0 + translation_x,
-        (min_y + max_y) / 2.0 + translation_y)
+    var center := Vector2(max_x / 2.0, max_y / 2.0)
     var raw_offset := Vector2(img_size / 2.0 - center.x, img_size / 2.0 - center.y)
     var cell := float(GRID.CELL_SIZE)
     var offset := Vector2(round(raw_offset.x / cell) * cell,
@@ -285,34 +228,7 @@ static func get_top_left_offset(name: String) -> Vector2:
     _check_cell_size()
     if _top_left_offsets.has(name):
         return _top_left_offsets[name]
-    if not _characters.has(name):
-        return Vector2.ZERO
-    var desc: Dictionary = _characters[name]
-    var scale := float(GRID.CELL_SIZE * GRID.COLS) / float(desc.get("size", 1))
-    var min_x := INF
-    var min_y := INF
-    var shapes: Array = _extract_all_shapes(desc.get("shapes", []))
-    if shapes.size() > 0:
-        for s in shapes:
-            match String(s.get("type", "")):
-                "rect":
-                    var p: Array = s.get("position", [0, 0])
-                    min_x = min(min_x, float(p[0]) * scale)
-                    min_y = min(min_y, float(p[1]) * scale)
-                "circle":
-                    var c: Array = s.get("center", [0, 0])
-                    var rad: float = float(s.get("radius", 0)) * scale
-                    min_x = min(min_x, float(c[0]) * scale - rad)
-                    min_y = min(min_y, float(c[1]) * scale - rad)
-    if min_x == INF:
-        min_x = 0
-    if min_y == INF:
-        min_y = 0
-    # Use the minimum coordinates to anchor the top-left corner at (0, 0).
-    var translation_x: float = -float(min_x)
-    var translation_y: float = -float(min_y)
-    var cell := float(GRID.CELL_SIZE)
-    var offset := Vector2(round(translation_x / cell) * cell, round(translation_y / cell) * cell)
+    var offset := Vector2.ZERO
     _top_left_offsets[name] = offset
     return offset
 
