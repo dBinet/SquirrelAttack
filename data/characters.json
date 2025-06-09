@@ -1,126 +1,432 @@
 {
   "alien": {
-    "size": 50,
-    "base_color": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "shapes": [
-      {
-        "type": "rect",
-        "position": [
-          0,
-          0
-        ],
-        "size": [
-          5,
-          5
-        ],
-        "color": [
-          1,
-          0,
-          0,
-          1
-        ]
-      },
-      {
-        "type": "rect",
-        "position": [
-          0,
-          5
-        ],
-        "size": [
-          5,
-          5
-        ],
-        "color": [
-          1,
-          0,
-          0,
-          1
-        ]
-      },
-      {
-        "type": "rect",
-        "position": [
-          0,
-          10
-        ],
-        "size": [
-          5,
-          5
-        ],
-        "color": [
-          1,
-          0,
-          0,
-          1
-        ]
-      }
-    ]
+	"size": 50,
+	"base_color": [
+	  0,
+	  0,
+	  0,
+	  0
+	],
+	"shapes": [
+	{
+		"type": "rect",
+		"position": [
+		  -5,
+		  -20
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	},
+	{
+		"type": "rect",
+		"position": [
+		  -30,
+		  -20
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	},
+	{
+		"type": "rect",
+		"position": [
+		  -10,
+		  -15
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	},
+	{
+		"type": "rect",
+		"position": [
+		  -25,
+		  -15
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	},
+	{
+		"type": "rect",
+		"position": [
+		  -30,
+		  -10
+		],
+		"size": [
+		  30,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	},
+	{
+		"type": "rect",
+		"position": [
+		  -35,
+		  -5
+		],
+		"size": [
+		  40,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -40,
+		  0
+		],
+		"size": [
+		  50,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -40,
+		  5
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -30,
+		  5
+		],
+		"size": [
+		  30,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  5,
+		  5
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -40,
+		  10
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -30,
+		  10
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -5,
+		  10
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  5,
+		  10
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -30,
+		  15
+		],
+		"size": [
+		  10,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -10,
+		  15
+		],
+		"size": [
+		  10,
+		  5
+		],
+		"color": [
+		  1,
+		  0,
+		  0,
+		  1
+		]
+	  }
+	]
   },
   "mech": {
-    "size": 50,
-    "base_color": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "shapes": [
-      {
-        "type": "rect",
-        "position": [
-          0,
-          0
-        ],
-        "size": [
-          5,
-          5
-        ],
-        "color": [
-          0,
-          0,
-          1,
-          1
-        ]
-      },
-      {
-        "type": "rect",
-        "position": [
-          5,
-          0
-        ],
-        "size": [
-          5,
-          5
-        ],
-        "color": [
-          0,
-          0,
-          1,
-          1
-        ]
-      },
-      {
-        "type": "rect",
-        "position": [
-          10,
-          0
-        ],
-        "size": [
-          5,
-          5
-        ],
-        "color": [
-          0,
-          0,
-          1,
-          1
-        ]
-      }
-    ]
+	"size": 50,
+	"base_color": [
+	  0,
+	  0,
+	  0,
+	  0
+	],
+	"shapes": [
+	  {
+		"type": "rect",
+		"position": [
+		  0,
+		  -65
+		],
+		"size": [
+		  10,
+		  10
+		],
+		"color": [
+		  0,
+		  0,
+		  1,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -5,
+		  -50
+		],
+		"size": [
+		  20,
+		  30
+		],
+		"color": [
+		  0,
+		  0,
+		  1,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -15,
+		  -50
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  0,
+		  0,
+		  1,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  20,
+		  -50
+		],
+		"size": [
+		  5,
+		  5
+		],
+		"color": [
+		  0,
+		  0,
+		  1,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -20,
+		  -45
+		],
+		"size": [
+		  5,
+		  15
+		],
+		"color": [
+		  0,
+		  0,
+		  1,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  25,
+		  -45
+		],
+		"size": [
+		  5,
+		  15
+		],
+		"color": [
+		  0,
+		  0,
+		  1,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  -10,
+		  -25
+		],
+		"size": [
+		  5,
+		  10
+		],
+		"color": [
+		  0,
+		  0,
+		  1,
+		  1
+		]
+	  },
+	  {
+		"type": "rect",
+		"position": [
+		  15,
+		  -25
+		],
+		"size": [
+		  5,
+		  10
+		],
+		"color": [
+		  0,
+		  0,
+		  1,
+		  1
+		]
+	  }
+	]
   }
 }
