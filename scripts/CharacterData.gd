@@ -321,7 +321,7 @@ static func get_grid_index(name: String) -> int:
     _load_data()
     if not _characters.has(name):
         return -1
-    var grid_val := _characters[name].get("grid", -1)
+    var grid_val = _characters[name].get("grid", -1)
     if typeof(grid_val) == TYPE_STRING:
         var lower := String(grid_val).to_lower()
         if lower == "left":
