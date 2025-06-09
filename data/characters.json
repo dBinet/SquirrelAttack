@@ -1,6 +1,7 @@
 {
   "alien": {
     "size": 50,
+    "grid": "right",
     "base_color": [
       0,
       0,
@@ -294,6 +295,7 @@
   },
   "mech": {
     "size": 50,
+    "grid": "left",
     "base_color": [
       0,
       0,

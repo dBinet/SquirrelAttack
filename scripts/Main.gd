@@ -18,6 +18,8 @@ const HAZARDS_PER_ROUND := 4
 # Sprite placeholders for an alien and a mech that appear behind the grids
 var _alien_sprite: Sprite2D
 var _mech_sprite: Sprite2D
+var _alien_grid_idx: int = 1
+var _mech_grid_idx: int = 0
 
 const CHARACTER_DATA = preload("res://scripts/CharacterData.gd")
 
@@ -68,11 +70,19 @@ func _ready() -> void:
     _alien_sprite.centered = true
     add_child(_alien_sprite)
 
+    _alien_grid_idx = CHARACTER_DATA.get_grid_index("alien")
+    if _alien_grid_idx < 0:
+        _alien_grid_idx = 1
+
     _mech_sprite = Sprite2D.new()
     _mech_sprite.texture = CHARACTER_DATA.get_texture("mech")
     _mech_sprite.z_index = -1
     _mech_sprite.centered = true
     add_child(_mech_sprite)
+
+    _mech_grid_idx = CHARACTER_DATA.get_grid_index("mech")
+    if _mech_grid_idx < 0:
+        _mech_grid_idx = 0
 
     _add_random_cards()
 
@@ -157,9 +167,9 @@ func _highlight_new_round() -> void:
         return
     var attack: Array[Vector2i] = ATTACK_DATA.get_random_attack()
     if attack.is_empty():
-        _grids[0].highlight_random_cells(HAZARDS_PER_ROUND)
+        _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
     else:
-        _grids[0].highlight_attack(attack)
+        _grids[_mech_grid_idx].highlight_attack(attack)
 
 func _apply_danger_damage() -> void:
     if _grids.size() < 2:
@@ -168,10 +178,10 @@ func _apply_danger_damage() -> void:
     if _mech_sprite and _mech_sprite.texture:
         var tex_size := _mech_sprite.texture.get_size() * _mech_sprite.scale
         rect = Rect2(_mech_sprite.global_position, tex_size)
-    var dmg := _grids[0].count_uncovered_highlights_in_rect(rect)
+    var dmg := _grids[_mech_grid_idx].count_uncovered_highlights_in_rect(rect)
     _player_health -= dmg
     _update_health_labels()
-    _grids[0].clear_highlights()
+    _grids[_mech_grid_idx].clear_highlights()
 
 func _discard_remaining_cards() -> void:
     for card in _cards:
@@ -215,12 +225,12 @@ func _update_health_label_positions() -> void:
     if _grids.size() < 2:
         return
     var grid_width := Grid.COLS * Grid.CELL_SIZE
-    _player_health_label.position = _grids[0].position + Vector2(grid_width / 2, -20)
-    _enemy_health_label.position = _grids[1].position + Vector2(grid_width / 2, -20)
+    _player_health_label.position = _grids[_mech_grid_idx].position + Vector2(grid_width / 2, -20)
+    _enemy_health_label.position = _grids[_alien_grid_idx].position + Vector2(grid_width / 2, -20)
 
 func _apply_damage(grid_idx: int, card: Card) -> void:
     var dmg: int = 0
-    if grid_idx == 1 and _alien_sprite and _alien_sprite.texture:
+    if grid_idx == _alien_grid_idx and _alien_sprite and _alien_sprite.texture:
         var desc: Dictionary = CHARACTER_DATA.get_description("alien")
         var shapes: Array = desc.get("shapes", [])
         var base_size: float = float(desc.get("size", 1))
@@ -260,10 +270,15 @@ func _update_creature_positions() -> void:
         return
     var grid_width: float = Grid.COLS * Grid.CELL_SIZE
     var grid_height: float = Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
-    var left_center := _grids[0].position + Vector2(grid_width / 2.0, grid_height / 2.0)
-    var right_center := _grids[1].position + Vector2(grid_width / 2.0, grid_height / 2.0)
-    _mech_sprite.position = left_center
-    _alien_sprite.position = right_center
+    var centers: Array[Vector2] = []
+    for g in _grids:
+        centers.append(g.position + Vector2(grid_width / 2.0, grid_height / 2.0))
+    if _mech_sprite:
+        var idx := clamp(_mech_grid_idx, 0, _grids.size() - 1)
+        _mech_sprite.position = centers[idx]
+    if _alien_sprite:
+        var idx := clamp(_alien_grid_idx, 0, _grids.size() - 1)
+        _alien_sprite.position = centers[idx]
 
 func _shapes_overlap_rect(shapes: Array, top_left: Vector2, ratio: float, scale: Vector2, rect: Rect2) -> bool:
     for s in shapes:
