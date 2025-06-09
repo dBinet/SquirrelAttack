@@ -7,6 +7,7 @@ var _end_button: Button
 var _energy_label: Label
 var _player_health_label: Label
 var _enemy_health_label: Label
+var _hover_label: Label
 const ENERGY_PER_TURN := 3
 var _energy_available: int = ENERGY_PER_TURN
 const STARTING_HEALTH := 10
@@ -56,6 +57,10 @@ func _ready() -> void:
     add_child(_enemy_health_label)
     _update_health_labels()
 
+    _hover_label = Label.new()
+    _hover_label.visible = false
+    add_child(_hover_label)
+
     # Create sprite placeholders for the alien and mech behind the grids
     _alien_sprite = Sprite2D.new()
     _alien_sprite.texture = CHARACTER_DATA.get_texture("alien")
@@ -83,6 +88,8 @@ func _process(delta: float) -> void:
         _update_scale()
         _update_card_positions()
         _position_grids()
+
+    _update_hover_label()
 
 func _update_card_positions() -> void:
     var viewport_size := _previous_viewport_size
@@ -284,4 +291,55 @@ func _circle_intersects_rect(center: Vector2, radius: float, rect: Rect2) -> boo
     var dx: float = center.x - closest_x
     var dy: float = center.y - closest_y
     return dx * dx + dy * dy <= radius * radius
+
+func _point_in_shape(point: Vector2, shape: Dictionary, top_left: Vector2, ratio: float, scale: Vector2) -> bool:
+    match String(shape.get("type", "")):
+        "rect":
+            var p: Array = shape.get("position", [0, 0])
+            var sz: Array = shape.get("size", [0, 0])
+            var pos := top_left + Vector2(float(p[0]) * ratio * scale.x, float(p[1]) * ratio * scale.y)
+            var size := Vector2(float(sz[0]) * ratio * scale.x, float(sz[1]) * ratio * scale.y)
+            return Rect2(pos, size).has_point(point)
+        "circle":
+            var c: Array = shape.get("center", [0, 0])
+            var rad: float = float(shape.get("radius", 0))
+            var ctr := top_left + Vector2(float(c[0]) * ratio * scale.x, float(c[1]) * ratio * scale.y)
+            var r: float = rad * ratio * max(scale.x, scale.y)
+            return (point - ctr).length_squared() <= r * r
+    return false
+
+func _group_at_point(name: String, desc: Dictionary, sprite: Sprite2D, point: Vector2) -> String:
+    if desc.is_empty() or sprite.texture == null:
+        return ""
+    var groups = CHARACTER_DATA.get_groups(name)
+    if groups.is_empty():
+        if desc.has("shapes"):
+            groups = {"": desc["shapes"]}
+        else:
+            return ""
+    var base_size: float = float(desc.get("size", 1))
+    var ratio: float = float(Grid.CELL_SIZE * Grid.COLS) / base_size
+    var scale := sprite.scale
+    var tex_size := sprite.texture.get_size() * scale
+    var top_left := sprite.global_position - tex_size / 2.0
+    for g in groups.keys():
+        var shapes: Array = groups[g]
+        for s in shapes:
+            if _point_in_shape(point, s, top_left, ratio, scale):
+                return String(g)
+    return ""
+
+func _update_hover_label() -> void:
+    if _hover_label == null:
+        return
+    var mouse_pos := get_global_mouse_position()
+    var group_name := _group_at_point("alien", CHARACTER_DATA.get_description("alien"), _alien_sprite, mouse_pos)
+    if group_name == "":
+        group_name = _group_at_point("mech", CHARACTER_DATA.get_description("mech"), _mech_sprite, mouse_pos)
+    if group_name == "":
+        _hover_label.visible = false
+        return
+    _hover_label.text = group_name
+    _hover_label.position = mouse_pos + Vector2(10, 10)
+    _hover_label.visible = true
 

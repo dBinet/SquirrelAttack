@@ -309,3 +309,17 @@ static func get_description(name: String) -> Dictionary:
     if _characters.has(name):
         return _characters[name]
     return {}
+
+# Returns a dictionary mapping group names to arrays of shape dictionaries for
+# the given character. If the shapes are not organized by group, the returned
+# dictionary contains a single entry with an empty string as the key.
+static func get_groups(name: String) -> Dictionary:
+    _load_data()
+    if not _characters.has(name):
+        return {}
+    var shapes = _characters[name].get("shapes")
+    if typeof(shapes) == TYPE_DICTIONARY:
+        return shapes
+    elif shapes is Array:
+        return {"": shapes}
+    return {}
