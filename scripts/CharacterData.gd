@@ -7,6 +7,7 @@ class_name CharacterData
 
 const CHARACTERS_FILE := "res://data/characters.json"
 const GRID := preload("res://scripts/Grid.gd")
+const OUTLINE_COLOR := Color.BLACK
 
 static var _last_cell_size: int = -1
 
@@ -64,6 +65,27 @@ static func _draw_circle(img: Image, center: Vector2, radius: int, color: Color)
             if dx * dx + dy * dy <= r2:
                 img.set_pixel(x, y, color)
 
+static func _draw_circle_outline(img: Image, center: Vector2, radius: int, color: Color) -> void:
+    if radius <= 0:
+        return
+    var r2_outer := float(radius * radius)
+    var r2_inner := float((radius - 1) * (radius - 1))
+    var min_x := int(center.x - radius)
+    var max_x := int(center.x + radius)
+    var min_y := int(center.y - radius)
+    var max_y := int(center.y + radius)
+    for x in range(min_x, max_x + 1):
+        if x < 0 or x >= img.get_width():
+            continue
+        for y in range(min_y, max_y + 1):
+            if y < 0 or y >= img.get_height():
+                continue
+            var dx := float(x) - center.x
+            var dy := float(y) - center.y
+            var d2 := dx * dx + dy * dy
+            if d2 <= r2_outer and d2 >= r2_inner:
+                img.set_pixel(x, y, color)
+
 static func _draw_rect(img: Image, pos: Vector2i, size: Vector2i, color: Color) -> void:
     var rect := Rect2i(pos, size)
     var img_rect := Rect2i(Vector2i.ZERO, img.get_size())
@@ -71,6 +93,26 @@ static func _draw_rect(img: Image, pos: Vector2i, size: Vector2i, color: Color) 
     if rect.size.x <= 0 or rect.size.y <= 0:
         return
     img.fill_rect(rect, color)
+
+static func _draw_rect_outline(img: Image, pos: Vector2i, size: Vector2i, color: Color) -> void:
+    if size.x <= 0 or size.y <= 0:
+        return
+    var x0 := pos.x
+    var y0 := pos.y
+    var x1 := pos.x + size.x - 1
+    var y1 := pos.y + size.y - 1
+    for x in range(x0, x1 + 1):
+        if x >= 0 and x < img.get_width():
+            if y0 >= 0 and y0 < img.get_height():
+                img.set_pixel(x, y0, color)
+            if y1 >= 0 and y1 < img.get_height():
+                img.set_pixel(x, y1, color)
+    for y in range(y0, y1 + 1):
+        if y >= 0 and y < img.get_height():
+            if x0 >= 0 and x0 < img.get_width():
+                img.set_pixel(x0, y, color)
+            if x1 >= 0 and x1 < img.get_width():
+                img.set_pixel(x1, y, color)
 
 static func _generate_texture(desc: Dictionary) -> ImageTexture:
     var base_size := float(desc.get("size", 64))
@@ -123,12 +165,14 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
                         var ctr := Vector2((float(c_arr[0]) + offset_x) * ratio, (float(c_arr[1]) + offset_y) * ratio)
                         var rad := int(float(s.get("radius", 0)) * ratio)
                         _draw_circle(img, ctr, rad, col)
+                        _draw_circle_outline(img, ctr, rad, OUTLINE_COLOR)
                     "rect":
                         var p_arr: Array = s.get("position", [0, 0])
                         var sz_arr: Array = s.get("size", [1, 1])
                         var pos := Vector2i(int(round((float(p_arr[0]) + offset_x) * ratio)), int(round((float(p_arr[1]) + offset_y) * ratio)))
                         var sz := Vector2i(int(round(float(sz_arr[0]) * ratio)), int(round(float(sz_arr[1]) * ratio)))
                         _draw_rect(img, pos, sz, col)
+                        _draw_rect_outline(img, pos, sz, OUTLINE_COLOR)
     return ImageTexture.create_from_image(img)
 
 static func get_texture(name: String) -> ImageTexture:
