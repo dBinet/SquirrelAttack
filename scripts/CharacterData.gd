@@ -49,7 +49,7 @@ static func _to_color(arr: Array) -> Color:
     return Color(r, g, b, a)
 
 static func _get_outline_color(desc: Dictionary) -> Color:
-    var arr := desc.get("outline_color")
+    var arr = desc.get("outline_color")
     if arr is Array:
         return _to_color(arr)
     return DEFAULT_OUTLINE_COLOR
