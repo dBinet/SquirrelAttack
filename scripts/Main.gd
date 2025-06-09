@@ -273,7 +273,7 @@ func _shapes_overlap_rect(shapes: Array, top_left: Vector2, ratio: float, scale:
                     var c: Array = s.get("center", [0, 0])
                     var rad: float = float(s.get("radius", 0))
                     var ctr := top_left + Vector2(float(c[0]) * ratio * scale.x, float(c[1]) * ratio * scale.y)
-                    var r := rad * ratio * max(scale.x, scale.y)
+                    var r: float = rad * ratio * max(scale.x, scale.y)
                     if _circle_intersects_rect(ctr, r, rect):
                         return true
     return false
