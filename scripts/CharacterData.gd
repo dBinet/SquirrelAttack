@@ -313,7 +313,7 @@ static func get_description(name: String) -> Dictionary:
 # Returns a dictionary mapping group names to arrays of shape dictionaries for
 # the given character. If the shapes are not organized by group, the returned
 # dictionary contains a single entry with an empty string as the key.
-static func get_groups(name: String) -> Dictionary:
+static func get_shape_groups(name: String) -> Dictionary:
     _load_data()
     if not _characters.has(name):
         return {}

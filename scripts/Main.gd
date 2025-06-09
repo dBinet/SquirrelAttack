@@ -311,7 +311,7 @@ func _point_in_shape(point: Vector2, shape: Dictionary, top_left: Vector2, ratio
 func _group_at_point(name: String, desc: Dictionary, sprite: Sprite2D, point: Vector2) -> String:
     if desc.is_empty() or sprite.texture == null:
         return ""
-    var groups = CHARACTER_DATA.get_groups(name)
+    var groups = CHARACTER_DATA.get_shape_groups(name)
     if groups.is_empty():
         if desc.has("shapes"):
             groups = {"": desc["shapes"]}
