@@ -107,8 +107,8 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
                             min_x = min(min_x, cx)
                             min_y = min(min_y, cy)
 
-    var offset_x: float = -min(0.0, min_x)
-    var offset_y: float = -min(0.0, min_y)
+    var offset_x: float = -float(min(0.0, min_x))
+    var offset_y: float = -float(min(0.0, min_y))
 
     var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
     var base_col := _to_color(desc.get("base_color", [0, 0, 0, 0]))
@@ -184,8 +184,8 @@ static func get_bounds(name: String) -> Vector2:
     if min_y == INF:
         min_y = 0
 
-    var translation_x: float = -min(0.0, min_x)
-    var translation_y: float = -min(0.0, min_y)
+    var translation_x: float = -float(min(0.0, min_x))
+    var translation_y: float = -float(min(0.0, min_y))
 
     var size := Vector2(max_x - min_x, max_y - min_y)
     _bounds[name] = size
@@ -237,8 +237,8 @@ static func get_top_left_offset(name: String) -> Vector2:
         min_x = 0
     if min_y == INF:
         min_y = 0
-    var translation_x: float = -min(0.0, min_x)
-    var translation_y: float = -min(0.0, min_y)
+    var translation_x: float = -float(min(0.0, min_x))
+    var translation_y: float = -float(min(0.0, min_y))
     var cell := float(GRID.CELL_SIZE)
     var offset := Vector2(round(translation_x / cell) * cell, round(translation_y / cell) * cell)
     _top_left_offsets[name] = offset
