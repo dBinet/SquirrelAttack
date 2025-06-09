@@ -120,6 +120,20 @@ static func _draw_rect_outline(img: Image, pos: Vector2i, size: Vector2i, color:
             if x1 >= 0 and x1 < img.get_width():
                 img.set_pixel(x1, y, color)
 
+static func _extract_all_shapes(data: Variant) -> Array:
+    var result: Array = []
+    if data is Array:
+        for s in data:
+            if s is Dictionary:
+                result.append(s)
+    elif data is Dictionary:
+        for v in data.values():
+            if v is Array:
+                for s in v:
+                    if s is Dictionary:
+                        result.append(s)
+    return result
+
 static func _generate_texture(desc: Dictionary) -> ImageTexture:
     var base_size := float(desc.get("size", 64))
     var size := int(GRID.CELL_SIZE * GRID.COLS)
@@ -127,33 +141,32 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
 
     var min_x := 0.0
     var min_y := 0.0
-    var shapes: Array = desc.get("shapes", [])
-    if shapes is Array:
+    var shapes: Array = _extract_all_shapes(desc.get("shapes", []))
+    if shapes.size() > 0:
         var first := true
         for s in shapes:
-            if s is Dictionary:
-                match String(s.get("type", "")):
-                    "rect":
-                        var p: Array = s.get("position", [0, 0])
-                        if first:
-                            min_x = float(p[0])
-                            min_y = float(p[1])
-                            first = false
-                        else:
-                            min_x = min(min_x, float(p[0]))
-                            min_y = min(min_y, float(p[1]))
-                    "circle":
-                        var c: Array = s.get("center", [0, 0])
-                        var rad: float = float(s.get("radius", 0))
-                        var cx := float(c[0]) - rad
-                        var cy := float(c[1]) - rad
-                        if first:
-                            min_x = cx
-                            min_y = cy
-                            first = false
-                        else:
-                            min_x = min(min_x, cx)
-                            min_y = min(min_y, cy)
+            match String(s.get("type", "")):
+                "rect":
+                    var p: Array = s.get("position", [0, 0])
+                    if first:
+                        min_x = float(p[0])
+                        min_y = float(p[1])
+                        first = false
+                    else:
+                        min_x = min(min_x, float(p[0]))
+                        min_y = min(min_y, float(p[1]))
+                "circle":
+                    var c: Array = s.get("center", [0, 0])
+                    var rad: float = float(s.get("radius", 0))
+                    var cx := float(c[0]) - rad
+                    var cy := float(c[1]) - rad
+                    if first:
+                        min_x = cx
+                        min_y = cy
+                        first = false
+                    else:
+                        min_x = min(min_x, cx)
+                        min_y = min(min_y, cy)
 
     var offset_x: float = -float(min(0.0, min_x))
     var offset_y: float = -float(min(0.0, min_y))
@@ -162,24 +175,22 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
     var base_col := _to_color(desc.get("base_color", [0, 0, 0, 0]))
     var outline_col := _get_outline_color(desc)
     img.fill(base_col)
-    if shapes is Array:
-        for s in shapes:
-            if s is Dictionary:
-                var col := _to_color(s.get("color", [1, 1, 1, 1]))
-                match String(s.get("type", "")):
-                    "circle":
-                        var c_arr: Array = s.get("center", [size / 2, size / 2])
-                        var ctr := Vector2((float(c_arr[0]) + offset_x) * ratio, (float(c_arr[1]) + offset_y) * ratio)
-                        var rad := int(float(s.get("radius", 0)) * ratio)
-                        _draw_circle(img, ctr, rad, col)
-                        _draw_circle_outline(img, ctr, rad, outline_col)
-                    "rect":
-                        var p_arr: Array = s.get("position", [0, 0])
-                        var sz_arr: Array = s.get("size", [1, 1])
-                        var pos := Vector2i(int(round((float(p_arr[0]) + offset_x) * ratio)), int(round((float(p_arr[1]) + offset_y) * ratio)))
-                        var sz := Vector2i(int(round(float(sz_arr[0]) * ratio)), int(round(float(sz_arr[1]) * ratio)))
-                        _draw_rect(img, pos, sz, col)
-                        _draw_rect_outline(img, pos, sz, outline_col)
+    for s in shapes:
+        var col := _to_color(s.get("color", [1, 1, 1, 1]))
+        match String(s.get("type", "")):
+            "circle":
+                var c_arr: Array = s.get("center", [size / 2, size / 2])
+                var ctr := Vector2((float(c_arr[0]) + offset_x) * ratio, (float(c_arr[1]) + offset_y) * ratio)
+                var rad := int(float(s.get("radius", 0)) * ratio)
+                _draw_circle(img, ctr, rad, col)
+                _draw_circle_outline(img, ctr, rad, outline_col)
+            "rect":
+                var p_arr: Array = s.get("position", [0, 0])
+                var sz_arr: Array = s.get("size", [1, 1])
+                var pos := Vector2i(int(round((float(p_arr[0]) + offset_x) * ratio)), int(round((float(p_arr[1]) + offset_y) * ratio)))
+                var sz := Vector2i(int(round(float(sz_arr[0]) * ratio)), int(round(float(sz_arr[1]) * ratio)))
+                _draw_rect(img, pos, sz, col)
+                _draw_rect_outline(img, pos, sz, outline_col)
     return ImageTexture.create_from_image(img)
 
 static func get_texture(name: String) -> ImageTexture:
@@ -203,33 +214,32 @@ static func get_bounds(name: String) -> Vector2:
     var min_y := INF
     var max_x := -INF
     var max_y := -INF
-    var shapes: Array = desc.get("shapes", [])
-    if shapes is Array:
+    var shapes: Array = _extract_all_shapes(desc.get("shapes", []))
+    if shapes.size() > 0:
         for s in shapes:
-            if s is Dictionary:
-                match String(s.get("type", "")):
-                    "rect":
-                        var p: Array = s.get("position", [0, 0])
-                        var sz: Array = s.get("size", [0, 0])
-                        var x0: float = float(p[0]) * scale
-                        var y0: float = float(p[1]) * scale
+            match String(s.get("type", "")):
+                "rect":
+                    var p: Array = s.get("position", [0, 0])
+                    var sz: Array = s.get("size", [0, 0])
+                    var x0: float = float(p[0]) * scale
+                    var y0: float = float(p[1]) * scale
                         var x1: float = x0 + float(sz[0]) * scale
                         var y1: float = y0 + float(sz[1]) * scale
                         min_x = min(min_x, x0)
                         min_y = min(min_y, y0)
                         max_x = max(max_x, x1)
                         max_y = max(max_y, y1)
-                    "circle":
-                        var ctr: Array = s.get("center", [0, 0])
-                        var rad: float = float(s.get("radius", 0)) * scale
-                        var x0 := float(ctr[0]) * scale - rad
-                        var y0 := float(ctr[1]) * scale - rad
-                        var x1 := float(ctr[0]) * scale + rad
-                        var y1 := float(ctr[1]) * scale + rad
-                        min_x = min(min_x, x0)
-                        min_y = min(min_y, y0)
-                        max_x = max(max_x, x1)
-                        max_y = max(max_y, y1)
+                "circle":
+                    var ctr: Array = s.get("center", [0, 0])
+                    var rad: float = float(s.get("radius", 0)) * scale
+                    var x0 := float(ctr[0]) * scale - rad
+                    var y0 := float(ctr[1]) * scale - rad
+                    var x1 := float(ctr[0]) * scale + rad
+                    var y1 := float(ctr[1]) * scale + rad
+                    min_x = min(min_x, x0)
+                    min_y = min(min_y, y0)
+                    max_x = max(max_x, x1)
+                    max_y = max(max_y, y1)
     if min_x == INF:
         min_x = 0
     if min_y == INF:
@@ -270,20 +280,19 @@ static func get_top_left_offset(name: String) -> Vector2:
     var scale := float(GRID.CELL_SIZE * GRID.COLS) / float(desc.get("size", 1))
     var min_x := INF
     var min_y := INF
-    var shapes: Array = desc.get("shapes", [])
-    if shapes is Array:
+    var shapes: Array = _extract_all_shapes(desc.get("shapes", []))
+    if shapes.size() > 0:
         for s in shapes:
-            if s is Dictionary:
-                match String(s.get("type", "")):
-                    "rect":
-                        var p: Array = s.get("position", [0, 0])
-                        min_x = min(min_x, float(p[0]) * scale)
-                        min_y = min(min_y, float(p[1]) * scale)
-                    "circle":
-                        var c: Array = s.get("center", [0, 0])
-                        var rad: float = float(s.get("radius", 0)) * scale
-                        min_x = min(min_x, float(c[0]) * scale - rad)
-                        min_y = min(min_y, float(c[1]) * scale - rad)
+            match String(s.get("type", "")):
+                "rect":
+                    var p: Array = s.get("position", [0, 0])
+                    min_x = min(min_x, float(p[0]) * scale)
+                    min_y = min(min_y, float(p[1]) * scale)
+                "circle":
+                    var c: Array = s.get("center", [0, 0])
+                    var rad: float = float(s.get("radius", 0)) * scale
+                    min_x = min(min_x, float(c[0]) * scale - rad)
+                    min_y = min(min_y, float(c[1]) * scale - rad)
     if min_x == INF:
         min_x = 0
     if min_y == INF:
