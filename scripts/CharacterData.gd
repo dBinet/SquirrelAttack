@@ -66,10 +66,10 @@ static func _draw_circle(img: Image, center: Vector2, radius: int, color: Color)
 
 static func _draw_rect(img: Image, pos: Vector2i, size: Vector2i, color: Color) -> void:
     var rect := Rect2i(pos, size)
-    rect.position.x = clamp(rect.position.x, 0, img.get_width())
-    rect.position.y = clamp(rect.position.y, 0, img.get_height())
-    rect.size.x = clamp(rect.size.x, 0, img.get_width() - rect.position.x)
-    rect.size.y = clamp(rect.size.y, 0, img.get_height() - rect.position.y)
+    var img_rect := Rect2i(Vector2i.ZERO, img.get_size())
+    rect = rect.intersection(img_rect)
+    if rect.size.x <= 0 or rect.size.y <= 0:
+        return
     img.fill_rect(rect, color)
 
 static func _generate_texture(desc: Dictionary) -> ImageTexture:
