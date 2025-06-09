@@ -221,25 +221,30 @@ static func get_bounds(name: String) -> Vector2:
                 "rect":
                     var p: Array = s.get("position", [0, 0])
                     var sz: Array = s.get("size", [0, 0])
-                    var x0: float = float(p[0]) * scale
-                    var y0: float = float(p[1]) * scale
-                    var x1: float = x0 + float(sz[0]) * scale
-                    var y1: float = y0 + float(sz[1]) * scale
-                    min_x = min(min_x, x0)
-                    min_y = min(min_y, y0)
-                    max_x = max(max_x, x1)
-                    max_y = max(max_y, y1)
+                    var x_pos: float = float(p[0]) * scale
+                    var y_pos: float = float(p[1]) * scale
+                    var x_end: float = x_pos + float(sz[0]) * scale
+                    var y_end: float = y_pos + float(sz[1]) * scale
+                    min_x = min(min_x, x_pos)
+                    min_y = min(min_y, y_pos)
+                    max_x = max(max_x, x_pos) # ignore width for centering
+                    max_y = max(max_y, y_pos)
+                    # ensure entire rect fits inside the image when size is negative
+                    if float(sz[0]) < 0:
+                        min_x = min(min_x, x_end)
+                    if float(sz[1]) < 0:
+                        min_y = min(min_y, y_end)
                 "circle":
                     var ctr: Array = s.get("center", [0, 0])
                     var rad: float = float(s.get("radius", 0)) * scale
-                    var x0 := float(ctr[0]) * scale - rad
-                    var y0 := float(ctr[1]) * scale - rad
-                    var x1 := float(ctr[0]) * scale + rad
-                    var y1 := float(ctr[1]) * scale + rad
+                    var cx := float(ctr[0]) * scale
+                    var cy := float(ctr[1]) * scale
+                    var x0 := cx - rad
+                    var y0 := cy - rad
                     min_x = min(min_x, x0)
                     min_y = min(min_y, y0)
-                    max_x = max(max_x, x1)
-                    max_y = max(max_y, y1)
+                    max_x = max(max_x, cx) # ignore radius for centering
+                    max_y = max(max_y, cy)
     if min_x == INF:
         min_x = 0
     if min_y == INF:
