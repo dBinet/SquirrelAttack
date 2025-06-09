@@ -7,6 +7,7 @@
 	  0,
 	  0
 	],
+        "outline_color": [0, 0, 0, 1],
 	"shapes": [
 	{
 		"type": "rect",
@@ -290,6 +291,7 @@
 	  0,
 	  0
 	],
+          "outline_color": [0, 0, 0, 1],
 	"shapes": [
 	  {
 		"type": "rect",

@@ -7,7 +7,7 @@ class_name CharacterData
 
 const CHARACTERS_FILE := "res://data/characters.json"
 const GRID := preload("res://scripts/Grid.gd")
-const OUTLINE_COLOR := Color.BLACK
+const DEFAULT_OUTLINE_COLOR := Color.BLACK
 
 static var _last_cell_size: int = -1
 
@@ -47,6 +47,12 @@ static func _to_color(arr: Array) -> Color:
         if arr.size() >= 4:
             a = float(arr[3])
     return Color(r, g, b, a)
+
+static func _get_outline_color(desc: Dictionary) -> Color:
+    var arr := desc.get("outline_color")
+    if arr is Array:
+        return _to_color(arr)
+    return DEFAULT_OUTLINE_COLOR
 
 static func _draw_circle(img: Image, center: Vector2, radius: int, color: Color) -> void:
     var r2 := float(radius * radius)
@@ -154,6 +160,7 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
 
     var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
     var base_col := _to_color(desc.get("base_color", [0, 0, 0, 0]))
+    var outline_col := _get_outline_color(desc)
     img.fill(base_col)
     if shapes is Array:
         for s in shapes:
@@ -165,14 +172,14 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
                         var ctr := Vector2((float(c_arr[0]) + offset_x) * ratio, (float(c_arr[1]) + offset_y) * ratio)
                         var rad := int(float(s.get("radius", 0)) * ratio)
                         _draw_circle(img, ctr, rad, col)
-                        _draw_circle_outline(img, ctr, rad, OUTLINE_COLOR)
+                        _draw_circle_outline(img, ctr, rad, outline_col)
                     "rect":
                         var p_arr: Array = s.get("position", [0, 0])
                         var sz_arr: Array = s.get("size", [1, 1])
                         var pos := Vector2i(int(round((float(p_arr[0]) + offset_x) * ratio)), int(round((float(p_arr[1]) + offset_y) * ratio)))
                         var sz := Vector2i(int(round(float(sz_arr[0]) * ratio)), int(round(float(sz_arr[1]) * ratio)))
                         _draw_rect(img, pos, sz, col)
-                        _draw_rect_outline(img, pos, sz, OUTLINE_COLOR)
+                        _draw_rect_outline(img, pos, sz, outline_col)
     return ImageTexture.create_from_image(img)
 
 static func get_texture(name: String) -> ImageTexture:
