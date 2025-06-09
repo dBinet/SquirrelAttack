@@ -274,10 +274,10 @@ func _update_creature_positions() -> void:
     for g in _grids:
         centers.append(g.position + Vector2(grid_width / 2.0, grid_height / 2.0))
     if _mech_sprite:
-        var idx := clamp(_mech_grid_idx, 0, _grids.size() - 1)
+        var idx: int = clamp(_mech_grid_idx, 0, _grids.size() - 1)
         _mech_sprite.position = centers[idx]
     if _alien_sprite:
-        var idx := clamp(_alien_grid_idx, 0, _grids.size() - 1)
+        var idx: int = clamp(_alien_grid_idx, 0, _grids.size() - 1)
         _alien_sprite.position = centers[idx]
 
 func _shapes_overlap_rect(shapes: Array, top_left: Vector2, ratio: float, scale: Vector2, rect: Rect2) -> bool:
