@@ -223,12 +223,12 @@ static func get_bounds(name: String) -> Vector2:
                     var sz: Array = s.get("size", [0, 0])
                     var x0: float = float(p[0]) * scale
                     var y0: float = float(p[1]) * scale
-                        var x1: float = x0 + float(sz[0]) * scale
-                        var y1: float = y0 + float(sz[1]) * scale
-                        min_x = min(min_x, x0)
-                        min_y = min(min_y, y0)
-                        max_x = max(max_x, x1)
-                        max_y = max(max_y, y1)
+                    var x1: float = x0 + float(sz[0]) * scale
+                    var y1: float = y0 + float(sz[1]) * scale
+                    min_x = min(min_x, x0)
+                    min_y = min(min_y, y0)
+                    max_x = max(max_x, x1)
+                    max_y = max(max_y, y1)
                 "circle":
                     var ctr: Array = s.get("center", [0, 0])
                     var rad: float = float(s.get("radius", 0)) * scale
