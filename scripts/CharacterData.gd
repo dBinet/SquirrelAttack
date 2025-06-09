@@ -315,6 +315,23 @@ static func get_description(name: String) -> Dictionary:
         return _characters[name]
     return {}
 
+# Returns the grid index for a character. Recognizes string values "left" and
+# "right" or an integer index. Returns -1 if unspecified.
+static func get_grid_index(name: String) -> int:
+    _load_data()
+    if not _characters.has(name):
+        return -1
+    var grid_val := _characters[name].get("grid", -1)
+    if typeof(grid_val) == TYPE_STRING:
+        var lower := String(grid_val).to_lower()
+        if lower == "left":
+            return 0
+        elif lower == "right":
+            return 1
+    elif typeof(grid_val) == TYPE_INT:
+        return int(grid_val)
+    return -1
+
 # Returns a dictionary mapping group names to arrays of shape dictionaries for
 # the given character. If the shapes are not organized by group, the returned
 # dictionary contains a single entry with an empty string as the key.
