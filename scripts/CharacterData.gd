@@ -127,11 +127,17 @@ static func _extract_all_shapes(data: Variant) -> Array:
             if s is Dictionary:
                 result.append(s)
     elif data is Dictionary:
-        for v in data.values():
-            if v is Array:
-                for s in v:
-                    if s is Dictionary:
-                        result.append(s)
+        # Support either an array of shapes or a single shape dictionary
+        if data.has("type"):
+            result.append(data)
+        else:
+            for v in data.values():
+                if v is Array:
+                    for s in v:
+                        if s is Dictionary:
+                            result.append(s)
+                elif v is Dictionary and v.has("type"):
+                    result.append(v)
     return result
 
 static func _generate_texture(desc: Dictionary) -> ImageTexture:
