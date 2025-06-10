@@ -141,15 +141,13 @@ static func _extract_all_shapes(data: Variant) -> Array:
     return result
 
 static func _generate_texture(desc: Dictionary) -> ImageTexture:
-    var base_size := float(desc.get("size", 64))
-    var size := int(GRID.CELL_SIZE * GRID.COLS)
-    var ratio := float(size) / base_size
+    var width := int(GRID.CELL_SIZE * GRID.COLS)
+    var height := int(GRID.CELL_SIZE * GRID.ROWS)
+    var cell := float(GRID.CELL_SIZE)
 
     var shapes: Array = _extract_all_shapes(desc.get("shapes", []))
-    var offset_x: float = 0.0
-    var offset_y: float = 0.0
 
-    var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+    var img := Image.create(width, height, false, Image.FORMAT_RGBA8)
     var base_col := _to_color(desc.get("base_color", [0, 0, 0, 0]))
     var outline_col := _get_outline_color(desc)
     img.fill(base_col)
@@ -157,16 +155,16 @@ static func _generate_texture(desc: Dictionary) -> ImageTexture:
         var col := _to_color(s.get("color", [1, 1, 1, 1]))
         match String(s.get("type", "")):
             "circle":
-                var c_arr: Array = s.get("center", [size / 2, size / 2])
-                var ctr := Vector2((float(c_arr[0]) + offset_x) * ratio, (float(c_arr[1]) + offset_y) * ratio)
-                var rad := int(float(s.get("radius", 0)) * ratio)
+                var c_arr: Array = s.get("center", [0, 0])
+                var ctr := Vector2(float(c_arr[0]) * cell, float(c_arr[1]) * cell)
+                var rad := int(float(s.get("radius", 0)) * cell)
                 _draw_circle(img, ctr, rad, col)
                 _draw_circle_outline(img, ctr, rad, outline_col)
             "rect":
                 var p_arr: Array = s.get("position", [0, 0])
                 var sz_arr: Array = s.get("size", [1, 1])
-                var pos := Vector2i(int(round((float(p_arr[0]) + offset_x) * ratio)), int(round((float(p_arr[1]) + offset_y) * ratio)))
-                var sz := Vector2i(int(round(float(sz_arr[0]) * ratio)), int(round(float(sz_arr[1]) * ratio)))
+                var pos := Vector2i(int(round(float(p_arr[0]) * cell)), int(round(float(p_arr[1]) * cell)))
+                var sz := Vector2i(int(round(float(sz_arr[0]) * cell)), int(round(float(sz_arr[1]) * cell)))
                 _draw_rect(img, pos, sz, col)
                 _draw_rect_outline(img, pos, sz, outline_col)
     return ImageTexture.create_from_image(img)
@@ -186,7 +184,7 @@ static func get_bounds(name: String) -> Vector2:
     if not _characters.has(name):
         return Vector2.ZERO
     var desc: Dictionary = _characters[name]
-    var scale := float(GRID.CELL_SIZE * GRID.COLS) / float(desc.get("size", 1))
+    var scale := float(GRID.CELL_SIZE)
     var size_px := float(GRID.CELL_SIZE * GRID.COLS)
     var max_x := 0.0
     var max_y := 0.0
@@ -212,9 +210,10 @@ static func get_bounds(name: String) -> Vector2:
     var size := Vector2(max_x, max_y)
     _bounds[name] = size
 
-    var img_size: float = float(GRID.CELL_SIZE * GRID.COLS)
+    var img_w: float = float(GRID.CELL_SIZE * GRID.COLS)
+    var img_h: float = float(GRID.CELL_SIZE * GRID.ROWS)
     var center := Vector2(max_x / 2.0, max_y / 2.0)
-    var raw_offset := Vector2(img_size / 2.0 - center.x, img_size / 2.0 - center.y)
+    var raw_offset := Vector2(img_w / 2.0 - center.x, img_h / 2.0 - center.y)
     var cell := float(GRID.CELL_SIZE)
     var offset := Vector2(round(raw_offset.x / cell) * cell,
         round(raw_offset.y / cell) * cell)
@@ -238,7 +237,7 @@ static func get_top_left_offset(name: String) -> Vector2:
         _top_left_offsets[name] = Vector2.ZERO
         return Vector2.ZERO
     var desc: Dictionary = _characters[name]
-    var scale := float(GRID.CELL_SIZE * GRID.COLS) / float(desc.get("size", 1))
+    var scale := float(GRID.CELL_SIZE)
     var min_x := 0.0
     var min_y := 0.0
     var shapes: Array = _extract_all_shapes(desc.get("shapes", []))

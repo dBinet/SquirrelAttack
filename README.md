@@ -12,9 +12,9 @@ This repository contains a minimal Godot project for a simple 2D card game proto
   Shapes may be grouped under named keys (for example `"left_arm"`) inside the
   `shapes` dictionary. Each entry may contain an array of shapes or a single
   shape dictionary. Each entry can optionally include an `outline_color` array
-  used when drawing the sprite. Shape positions are specified relative to the
-  top-left corner of the sprite canvas and negative values are no longer
-  supported.
+  used when drawing the sprite. Shape positions are specified using grid
+  coordinates measured from the top-left corner of the sprite canvas and
+  negative values are no longer supported.
 
 ## Getting Started
 1. Open the folder in Godot 4.x.

@@ -233,8 +233,7 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
     if grid_idx == _alien_grid_idx and _alien_sprite and _alien_sprite.texture:
         var desc: Dictionary = CHARACTER_DATA.get_description("alien")
         var shapes: Array = desc.get("shapes", [])
-        var base_size: float = float(desc.get("size", 1))
-        var ratio: float = float(Grid.CELL_SIZE * Grid.COLS) / base_size
+        var ratio: float = float(Grid.CELL_SIZE)
         var sprite_scale := Vector2(_alien_sprite.scale.x, _alien_sprite.scale.y)
         var tex_size: Vector2 = _alien_sprite.texture.get_size() * sprite_scale
         var sprite_top_left := _alien_sprite.global_position
@@ -261,10 +260,9 @@ func _update_sprite(sprite: Sprite2D, name: String, width: float, height: float)
     sprite.offset = CHARACTER_DATA.get_top_left_offset(name)
     if sprite.texture:
         var tex_size: Vector2 = sprite.texture.get_size()
-        var factor_x := width / tex_size.x if tex_size.x > 0 else 1.0
-        var factor_y := height / tex_size.y if tex_size.y > 0 else 1.0
-        var factor: float = min(factor_x, factor_y)
-        sprite.scale = Vector2(factor, factor * GRID_VERTICAL_SCALE)
+        var scale_x := width / tex_size.x if tex_size.x > 0 else 1.0
+        var scale_y := height / tex_size.y if tex_size.y > 0 else 1.0
+        sprite.scale = Vector2(scale_x, scale_y)
 
 func _update_creature_positions() -> void:
     if _grids.size() < 2:
@@ -331,8 +329,7 @@ func _group_at_point(name: String, desc: Dictionary, sprite: Sprite2D, point: Ve
             groups = {"": desc["shapes"]}
         else:
             return ""
-    var base_size: float = float(desc.get("size", 1))
-    var ratio: float = float(Grid.CELL_SIZE * Grid.COLS) / base_size
+    var ratio: float = float(Grid.CELL_SIZE)
     var scale := sprite.scale
     var tex_size := sprite.texture.get_size() * scale
     var top_left := sprite.global_position
