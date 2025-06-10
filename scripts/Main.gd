@@ -67,7 +67,7 @@ func _ready() -> void:
     _alien_sprite = Sprite2D.new()
     _alien_sprite.texture = CHARACTER_DATA.get_texture("alien")
     _alien_sprite.z_index = -1
-    _alien_sprite.centered = true
+    _alien_sprite.centered = false
     add_child(_alien_sprite)
 
     _alien_grid_idx = CHARACTER_DATA.get_grid_index("alien")
@@ -77,7 +77,7 @@ func _ready() -> void:
     _mech_sprite = Sprite2D.new()
     _mech_sprite.texture = CHARACTER_DATA.get_texture("mech")
     _mech_sprite.z_index = -1
-    _mech_sprite.centered = true
+    _mech_sprite.centered = false
     add_child(_mech_sprite)
 
     _mech_grid_idx = CHARACTER_DATA.get_grid_index("mech")
@@ -237,7 +237,7 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
         var ratio: float = float(Grid.CELL_SIZE * Grid.COLS) / base_size
         var sprite_scale := Vector2(_alien_sprite.scale.x, _alien_sprite.scale.y)
         var tex_size: Vector2 = _alien_sprite.texture.get_size() * sprite_scale
-        var sprite_top_left := _alien_sprite.global_position - tex_size / 2.0
+        var sprite_top_left := _alien_sprite.global_position
         var blocks: Array[Vector2] = card.get_global_block_positions()
         for b in blocks:
             var block_rect := Rect2(b, Vector2(Grid.CELL_SIZE, Grid.CELL_SIZE))
@@ -257,7 +257,8 @@ func _update_sprite(sprite: Sprite2D, name: String, width: float, height: float)
     if sprite == null:
         return
     sprite.texture = CHARACTER_DATA.get_texture(name)
-    sprite.offset = CHARACTER_DATA.get_center_offset(name)
+    sprite.centered = false
+    sprite.offset = CHARACTER_DATA.get_top_left_offset(name)
     if sprite.texture:
         var tex_size: Vector2 = sprite.texture.get_size()
         var factor_x := width / tex_size.x if tex_size.x > 0 else 1.0
@@ -268,17 +269,15 @@ func _update_sprite(sprite: Sprite2D, name: String, width: float, height: float)
 func _update_creature_positions() -> void:
     if _grids.size() < 2:
         return
-    var grid_width: float = Grid.COLS * Grid.CELL_SIZE
-    var grid_height: float = Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
-    var centers: Array[Vector2] = []
+    var positions: Array[Vector2] = []
     for g in _grids:
-        centers.append(g.position + Vector2(grid_width / 2.0, grid_height / 2.0))
+        positions.append(g.position)
     if _mech_sprite:
         var idx: int = clamp(_mech_grid_idx, 0, _grids.size() - 1)
-        _mech_sprite.position = centers[idx]
+        _mech_sprite.position = positions[idx]
     if _alien_sprite:
         var idx: int = clamp(_alien_grid_idx, 0, _grids.size() - 1)
-        _alien_sprite.position = centers[idx]
+        _alien_sprite.position = positions[idx]
 
 func _shapes_overlap_rect(shapes: Array, top_left: Vector2, ratio: float, scale: Vector2, rect: Rect2) -> bool:
     for s in shapes:
@@ -336,7 +335,7 @@ func _group_at_point(name: String, desc: Dictionary, sprite: Sprite2D, point: Ve
     var ratio: float = float(Grid.CELL_SIZE * Grid.COLS) / base_size
     var scale := sprite.scale
     var tex_size := sprite.texture.get_size() * scale
-    var top_left := sprite.global_position - tex_size / 2.0
+    var top_left := sprite.global_position
     for g in groups.keys():
         var shapes: Array = groups[g]
         for s in shapes:
