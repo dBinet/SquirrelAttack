@@ -228,7 +228,32 @@ static func get_top_left_offset(name: String) -> Vector2:
     _check_cell_size()
     if _top_left_offsets.has(name):
         return _top_left_offsets[name]
-    var offset := Vector2.ZERO
+    if not _characters.has(name):
+        _top_left_offsets[name] = Vector2.ZERO
+        return Vector2.ZERO
+    var desc: Dictionary = _characters[name]
+    var scale := float(GRID.CELL_SIZE * GRID.COLS) / float(desc.get("size", 1))
+    var min_x := 0.0
+    var min_y := 0.0
+    var shapes: Array = _extract_all_shapes(desc.get("shapes", []))
+    if shapes.size() > 0:
+        min_x = INF
+        min_y = INF
+        for s in shapes:
+            match String(s.get("type", "")):
+                "rect":
+                    var p: Array = s.get("position", [0, 0])
+                    min_x = min(min_x, float(p[0]) * scale)
+                    min_y = min(min_y, float(p[1]) * scale)
+                "circle":
+                    var c: Array = s.get("center", [0, 0])
+                    var r: float = float(s.get("radius", 0)) * scale
+                    min_x = min(min_x, float(c[0]) * scale - r)
+                    min_y = min(min_y, float(c[1]) * scale - r)
+    var cell := float(GRID.CELL_SIZE)
+    var offset := Vector2(-min_x, -min_y)
+    offset.x = round(offset.x / cell) * cell
+    offset.y = round(offset.y / cell) * cell
     _top_left_offsets[name] = offset
     return offset
 
