@@ -1,4 +1,11 @@
 {
+  "header": {
+    "instructions": "Add new characters as top-level keys. Each character entry contains a size, optional grid index, colors, and a 'shapes' dictionary. Shape positions are measured from the top-left corner of a 50x50 canvas. Example shapes show how to place a square in the top-left and bottom-right corners:",
+    "examples": {
+      "square_top_left": {"type": "rect", "position": [0, 0], "size": [5, 5], "color": [1, 1, 1, 1]},
+      "square_bottom_right": {"type": "rect", "position": [45, 45], "size": [5, 5], "color": [1, 1, 1, 1]}
+    }
+  },
   "alien": {
 	"size": 50,
 	"grid": "right",
