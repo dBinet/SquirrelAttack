@@ -345,12 +345,18 @@ func _update_hover_label() -> void:
         return
     var mouse_pos := get_global_mouse_position()
     var group_name := _group_at_point("alien", CHARACTER_DATA.get_description("alien"), _alien_sprite, mouse_pos)
-    if group_name == "":
+    var char_name := ""
+    if group_name != "":
+        char_name = "alien"
+    else:
         group_name = _group_at_point("mech", CHARACTER_DATA.get_description("mech"), _mech_sprite, mouse_pos)
-    if group_name == "":
+        if group_name != "":
+            char_name = "mech"
+    if group_name == "" or char_name == "":
         _hover_label.visible = false
         return
-    _hover_label.text = group_name
+    var health := CHARACTER_DATA.get_group_health(char_name, group_name)
+    _hover_label.text = group_name + " (" + str(health) + ")"
     _hover_label.position = mouse_pos + Vector2(10, 10)
     _hover_label.visible = true
 
