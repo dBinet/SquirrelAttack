@@ -121,24 +121,22 @@ static func _draw_rect_outline(img: Image, pos: Vector2i, size: Vector2i, color:
 				img.set_pixel(x1, y, color)
 
 static func _extract_all_shapes(data: Variant) -> Array:
-	var result: Array = []
-	if data is Array:
-		for s in data:
-			if s is Dictionary:
-				result.append(s)
-	elif data is Dictionary:
-		# Support either an array of shapes or a single shape dictionary
-		if data.has("type"):
-			result.append(data)
-		else:
-			for v in data.values():
-				if v is Array:
-					for s in v:
-						if s is Dictionary:
-							result.append(s)
-				elif v is Dictionary and v.has("type"):
-					result.append(v)
-	return result
+        var result: Array = []
+        if data is Array:
+                for s in data:
+                        if s is Dictionary:
+                                result.append(s)
+        elif data is Dictionary:
+                # Support either an array of shapes or a single shape dictionary
+                if data.has("type"):
+                        result.append(data)
+                elif data.has("shapes"):
+                        result.append_array(_extract_all_shapes(data.get("shapes")))
+                else:
+                        for v in data.values():
+                                if v is Array or v is Dictionary:
+                                        result.append_array(_extract_all_shapes(v))
+        return result
 
 static func _generate_texture(desc: Dictionary) -> ImageTexture:
 	var width := int(GRID.CELL_SIZE * GRID.COLS)
@@ -298,12 +296,63 @@ static func get_grid_index(name: String) -> int:
 # the given character. If the shapes are not organized by group, the returned
 # dictionary contains a single entry with an empty string as the key.
 static func get_shape_groups(name: String) -> Dictionary:
-	_load_data()
-	if not _characters.has(name):
-		return {}
-	var shapes = _characters[name].get("shapes")
-	if typeof(shapes) == TYPE_DICTIONARY:
-		return shapes
-	elif shapes is Array:
-		return {"": shapes}
-	return {}
+        _load_data()
+        if not _characters.has(name):
+                return {}
+        var shapes = _characters[name].get("shapes")
+        if typeof(shapes) == TYPE_DICTIONARY:
+                var result: Dictionary = {}
+                for g in shapes.keys():
+                        var entry = shapes[g]
+                        if entry is Array:
+                                result[g] = entry
+                        elif entry is Dictionary:
+                                if entry.has("shapes"):
+                                        var arr = entry["shapes"]
+                                        if arr is Array:
+                                                result[g] = arr
+                                        else:
+                                                result[g] = _extract_all_shapes(arr)
+                                elif entry.has("type"):
+                                        result[g] = [entry]
+                return result
+        elif shapes is Array:
+                return {"": shapes}
+        return {}
+
+# Returns the health value for a specific group of a character. If the group
+# defines a "health" key, that value is returned. Otherwise the health is
+# calculated as the total number of squares described by the group's shapes.
+static func get_group_health(name: String, group: String) -> int:
+        _load_data()
+        if not _characters.has(name):
+                return 0
+        var shapes_dict = _characters[name].get("shapes")
+        if typeof(shapes_dict) != TYPE_DICTIONARY or not shapes_dict.has(group):
+                return 0
+        var entry = shapes_dict[group]
+        if entry is Dictionary and entry.has("health"):
+                return int(entry["health"])
+        var arr: Array = []
+        if entry is Array:
+                arr = entry
+        elif entry is Dictionary:
+                if entry.has("shapes"):
+                        var tmp = entry["shapes"]
+                        if tmp is Array:
+                                arr = tmp
+                        else:
+                                arr = _extract_all_shapes(tmp)
+                elif entry.has("type"):
+                        arr = [entry]
+        var health: int = 0
+        for s in arr:
+                if s is Dictionary:
+                        match String(s.get("type", "")):
+                                "rect":
+                                        var sz: Array = s.get("size", [0, 0])
+                                        health += int(sz[0]) * int(sz[1])
+                                "circle":
+                                        var r: float = float(s.get("radius", 0))
+                                        health += int(PI * r * r)
+        return health
