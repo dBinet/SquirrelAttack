@@ -257,7 +257,16 @@ static func get_top_left_offset(name: String) -> Vector2:
                     min_x = min(min_x, float(c[0]) * scale - r)
                     min_y = min(min_y, float(c[1]) * scale - r)
     var cell := float(GRID.CELL_SIZE)
-    var offset := Vector2(-min_x, -min_y)
+    var offset_x: float = 0.0
+    var offset_y: float = 0.0
+    # Only apply an offset when shapes use negative coordinates. Positive
+    # values are already measured from the top-left of the canvas and should
+    # remain unchanged.
+    if min_x < 0:
+        offset_x = -min_x
+    if min_y < 0:
+        offset_y = -min_y
+    var offset := Vector2(offset_x, offset_y)
     offset.x = round(offset.x / cell) * cell
     offset.y = round(offset.y / cell) * cell
     _top_left_offsets[name] = offset
