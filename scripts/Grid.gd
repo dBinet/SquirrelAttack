@@ -1,7 +1,7 @@
 extends Node2D
 class_name Grid
 
-const COLS := 10
+const COLS := 20
 const ROWS := 20
 # Base cell size used to compute scaling
 const BASE_CELL_SIZE := 20

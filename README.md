@@ -30,3 +30,5 @@ This repository contains a minimal Godot project for a simple 2D card game proto
   that touch the mech.
 
 The project is intentionally minimal and can be extended with gameplay and assets.
+Each grid now spans 20 columns, so both the player and enemy grids adjust their
+cell size to fit side by side without overlapping.
