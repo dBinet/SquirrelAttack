@@ -7,6 +7,7 @@ class_name CharacterData
 
 const CHARACTERS_FILE := "res://data/characters.json"
 const GRID := preload("res://scripts/Grid.gd")
+const DATA_UTILS := preload("res://scripts/DataUtils.gd")
 const DEFAULT_OUTLINE_COLOR := Color.BLACK
 
 static var _last_cell_size: int = -1
@@ -19,12 +20,14 @@ static var _top_left_offsets: Dictionary = {}
 static var _current_health: Dictionary = {}
 static var _max_health: Dictionary = {}
 static var _health_initialized := false
+static var _textures: Dictionary = {}
 
 static func _check_cell_size() -> void:
     if _last_cell_size != GRID.CELL_SIZE:
         _bounds.clear()
         _offsets.clear()
         _top_left_offsets.clear()
+        _textures.clear()
         _last_cell_size = GRID.CELL_SIZE
 
 static func _load_data() -> void:
@@ -39,17 +42,7 @@ static func _load_data() -> void:
     _loaded = true
 
 static func _to_color(arr: Array) -> Color:
-    var r: float = 0
-    var g: float = 0
-    var b: float = 0
-    var a: float = 1
-    if arr.size() >= 3:
-        r = float(arr[0])
-        g = float(arr[1])
-        b = float(arr[2])
-        if arr.size() >= 4:
-            a = float(arr[3])
-    return Color(r, g, b, a)
+    return DATA_UTILS.to_color(arr)
 
 static func _get_outline_color(desc: Dictionary) -> Color:
     var arr = desc.get("outline_color")
@@ -188,8 +181,12 @@ static func _generate_texture(name: String, desc: Dictionary) -> ImageTexture:
 static func get_texture(name: String) -> ImageTexture:
     _load_data()
     _check_cell_size()
+    if _textures.has(name):
+        return _textures[name]
     if _characters.has(name):
-        return _generate_texture(name, _characters[name])
+        var tex := _generate_texture(name, _characters[name])
+        _textures[name] = tex
+        return tex
     return ImageTexture.new()
 
 static func get_bounds(name: String) -> Vector2:
@@ -286,6 +283,54 @@ static func get_top_left_offset(name: String) -> Vector2:
     offset.y = round(offset.y / cell) * cell
     _top_left_offsets[name] = offset
     return offset
+
+# Determines if a circle intersects a rectangle
+static func _circle_intersects_rect(center: Vector2, radius: float, rect: Rect2) -> bool:
+    var closest_x: float = clamp(center.x, rect.position.x, rect.position.x + rect.size.x)
+    var closest_y: float = clamp(center.y, rect.position.y, rect.position.y + rect.size.y)
+    var dx: float = center.x - closest_x
+    var dy: float = center.y - closest_y
+    return dx * dx + dy * dy <= radius * radius
+
+static func _point_in_shape(point: Vector2, shape: Dictionary, top_left: Vector2, cell: float, scale: Vector2) -> bool:
+    match String(shape.get("type", "")):
+        "rect":
+            var p: Array = shape.get("position", [0, 0])
+            var sz: Array = shape.get("size", [0, 0])
+            var pos := top_left + Vector2(float(p[0]) * cell * scale.x, float(p[1]) * cell * scale.y)
+            var size := Vector2(float(sz[0]) * cell * scale.x, float(sz[1]) * cell * scale.y)
+            return Rect2(pos, size).has_point(point)
+        "circle":
+            var c: Array = shape.get("center", [0, 0])
+            var rad: float = float(shape.get("radius", 0))
+            var ctr := top_left + Vector2(float(c[0]) * cell * scale.x, float(c[1]) * cell * scale.y)
+            var r: float = rad * cell * max(scale.x, scale.y)
+            return (point - ctr).length_squared() <= r * r
+    return false
+
+static func group_at_point(name: String, sprite: Sprite2D, point: Vector2) -> String:
+    _load_data()
+    _check_cell_size()
+    var desc := get_description(name)
+    if desc.is_empty() or sprite.texture == null:
+        return ""
+    var groups: Dictionary = get_shape_groups(name)
+    if groups.is_empty():
+        if desc.has("shapes"):
+            groups = {"": desc["shapes"]}
+        else:
+            return ""
+    var cell := float(GRID.CELL_SIZE)
+    var scale := sprite.scale
+    var top_left := sprite.global_position
+    for g in groups.keys():
+        if get_group_health(name, String(g)) <= 0:
+            continue
+        var shapes: Array = groups[g]
+        for s in shapes:
+            if _point_in_shape(point, s, top_left, cell, scale):
+                return String(g)
+    return ""
 
 static func get_description(name: String) -> Dictionary:
     _load_data()

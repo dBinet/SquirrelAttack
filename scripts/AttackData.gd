@@ -2,6 +2,7 @@ extends Node
 class_name AttackData
 
 const ATTACKS_FILE := "res://data/attacks.json"
+const DATA_UTILS := preload("res://scripts/DataUtils.gd")
 
 static var _attacks: Array = []
 static var _loaded: bool = false
@@ -25,8 +26,8 @@ static func _load_data() -> void:
             if attack is Array:
                 var cells: Array[Vector2i] = []
                 for c in attack:
-                    if c is Array and c.size() >= 2:
-                        cells.append(Vector2i(int(c[0]), int(c[1])))
+                    if c is Array:
+                        cells.append(DATA_UTILS.array_to_vector2i(c))
                 if cells.size() == 4:
                     _attacks.append(cells)
 

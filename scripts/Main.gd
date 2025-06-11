@@ -180,13 +180,12 @@ func _apply_danger_damage() -> void:
     if _mech_sprite == null or _mech_sprite.texture == null:
         return
     var grid := _grids[_mech_grid_idx]
-    var desc := CHARACTER_DATA.get_description("mech")
     var dmg := 0
     for c in grid.danger_cells:
         if grid.cells[c.x][c.y]:
             continue
         var center := grid.to_global(Vector2((c.x + 0.5) * Grid.CELL_SIZE, (c.y + 0.5) * Grid.CELL_SIZE))
-        var group_name := _group_at_point("mech", desc, _mech_sprite, center)
+        var group_name := CHARACTER_DATA.group_at_point("mech", _mech_sprite, center)
         if group_name != "":
             CHARACTER_DATA.damage_group("mech", group_name, 1)
             dmg += 1
@@ -242,11 +241,10 @@ func _update_health_label_positions() -> void:
 
 func _apply_damage(grid_idx: int, card: Card) -> void:
     if grid_idx == _alien_grid_idx and _alien_sprite and _alien_sprite.texture:
-        var desc: Dictionary = CHARACTER_DATA.get_description("alien")
         var blocks: Array[Vector2] = card.get_global_block_positions()
         for b in blocks:
             var center := b + Vector2(Grid.CELL_SIZE / 2.0, Grid.CELL_SIZE / 2.0)
-            var group_name := _group_at_point("alien", desc, _alien_sprite, center)
+            var group_name := CHARACTER_DATA.group_at_point("alien", _alien_sprite, center)
             if group_name != "":
                 CHARACTER_DATA.damage_group("alien", group_name, 1)
         _enemy_health = CHARACTER_DATA.get_total_health("alien")
@@ -285,81 +283,17 @@ func _update_creature_positions() -> void:
         var idx: int = clamp(_alien_grid_idx, 0, _grids.size() - 1)
         _alien_sprite.position = positions[idx]
 
-func _shapes_overlap_rect(shapes: Array, top_left: Vector2, ratio: float, scale: Vector2, rect: Rect2) -> bool:
-    for s in shapes:
-        if s is Dictionary:
-            match String(s.get("type", "")):
-                "rect":
-                    var p: Array = s.get("position", [0, 0])
-                    var sz: Array = s.get("size", [0, 0])
-                    var pos := top_left + Vector2(float(p[0]) * ratio * scale.x, float(p[1]) * ratio * scale.y)
-                    var size := Vector2(float(sz[0]) * ratio * scale.x, float(sz[1]) * ratio * scale.y)
-                    if Rect2(pos, size).intersects(rect):
-                        return true
-                "circle":
-                    var c: Array = s.get("center", [0, 0])
-                    var rad: float = float(s.get("radius", 0))
-                    var ctr := top_left + Vector2(float(c[0]) * ratio * scale.x, float(c[1]) * ratio * scale.y)
-                    var r: float = rad * ratio * max(scale.x, scale.y)
-                    if _circle_intersects_rect(ctr, r, rect):
-                        return true
-    return false
-
-func _circle_intersects_rect(center: Vector2, radius: float, rect: Rect2) -> bool:
-    var closest_x: float = clamp(center.x, rect.position.x, rect.position.x + rect.size.x)
-    var closest_y: float = clamp(center.y, rect.position.y, rect.position.y + rect.size.y)
-    var dx: float = center.x - closest_x
-    var dy: float = center.y - closest_y
-    return dx * dx + dy * dy <= radius * radius
-
-func _point_in_shape(point: Vector2, shape: Dictionary, top_left: Vector2, ratio: float, scale: Vector2) -> bool:
-    match String(shape.get("type", "")):
-        "rect":
-            var p: Array = shape.get("position", [0, 0])
-            var sz: Array = shape.get("size", [0, 0])
-            var pos := top_left + Vector2(float(p[0]) * ratio * scale.x, float(p[1]) * ratio * scale.y)
-            var size := Vector2(float(sz[0]) * ratio * scale.x, float(sz[1]) * ratio * scale.y)
-            return Rect2(pos, size).has_point(point)
-        "circle":
-            var c: Array = shape.get("center", [0, 0])
-            var rad: float = float(shape.get("radius", 0))
-            var ctr := top_left + Vector2(float(c[0]) * ratio * scale.x, float(c[1]) * ratio * scale.y)
-            var r: float = rad * ratio * max(scale.x, scale.y)
-            return (point - ctr).length_squared() <= r * r
-    return false
-
-func _group_at_point(name: String, desc: Dictionary, sprite: Sprite2D, point: Vector2) -> String:
-    if desc.is_empty() or sprite.texture == null:
-        return ""
-    var groups = CHARACTER_DATA.get_shape_groups(name)
-    if groups.is_empty():
-        if desc.has("shapes"):
-            groups = {"": desc["shapes"]}
-        else:
-            return ""
-    var ratio: float = float(Grid.CELL_SIZE)
-    var scale := sprite.scale
-    var tex_size := sprite.texture.get_size() * scale
-    var top_left := sprite.global_position
-    for g in groups.keys():
-        if CHARACTER_DATA.get_group_health(name, String(g)) <= 0:
-            continue
-        var shapes: Array = groups[g]
-        for s in shapes:
-            if _point_in_shape(point, s, top_left, ratio, scale):
-                return String(g)
-    return ""
 
 func _update_hover_label() -> void:
     if _hover_label == null:
         return
     var mouse_pos := get_global_mouse_position()
-    var group_name := _group_at_point("alien", CHARACTER_DATA.get_description("alien"), _alien_sprite, mouse_pos)
+    var group_name := CHARACTER_DATA.group_at_point("alien", _alien_sprite, mouse_pos)
     var char_name := ""
     if group_name != "":
         char_name = "alien"
     else:
-        group_name = _group_at_point("mech", CHARACTER_DATA.get_description("mech"), _mech_sprite, mouse_pos)
+        group_name = CHARACTER_DATA.group_at_point("mech", _mech_sprite, mouse_pos)
         if group_name != "":
             char_name = "mech"
     if group_name == "" or char_name == "":

@@ -2,6 +2,7 @@ extends Node
 class_name ShapeData
 
 const SHAPES_FILE := "res://data/shapes.json"
+const DATA_UTILS := preload("res://scripts/DataUtils.gd")
 
 static var _shapes: Dictionary = {}
 static var _loaded := false
@@ -34,8 +35,9 @@ static func get_blocks(name: String) -> Array[Vector2]:
         var arr: Array = _shapes[name]["blocks"]
         var blocks: Array[Vector2] = []
         for b in arr:
-            if b is Array and b.size() >= 2:
-                blocks.append(Vector2(b[0], b[1]))
+            if b is Array:
+                var v := DATA_UTILS.array_to_vector2i(b)
+                blocks.append(Vector2(v.x, v.y))
         return blocks
     return []
 
