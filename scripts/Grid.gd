@@ -22,7 +22,9 @@ static func set_cell_size(new_size: float) -> void:
             if grid is Grid:
                 grid.queue_redraw()
 
-var cells: Array[Array[bool]] = []
+# Nested typed arrays are not supported in GDScript, so
+# use an untyped outer Array for the grid rows.
+var cells: Array = []
 var preview_cells: Array[Vector2i] = []
 var danger_cells: Array[Vector2i] = []
 
