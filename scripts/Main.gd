@@ -19,6 +19,11 @@ var _alien_sprite: Sprite2D
 var _mech_sprite: Sprite2D
 var _alien_grid_idx: int = 1
 var _mech_grid_idx: int = 0
+var _current_alien_name: String = "alien"
+var _current_mech_name: String = "mech"
+
+const ALIEN_NAMES := ["alien", "alien2", "alien3", "alien4"]
+const MECH_NAMES := ["mech", "mech2", "mech3", "mech4"]
 
 const CHARACTER_DATA = preload("res://scripts/CharacterData.gd")
 
@@ -34,6 +39,8 @@ var _shape_names: Array[String] = []
 
 func _ready() -> void:
     randomize()
+    _current_mech_name = MECH_NAMES[randi_range(0, MECH_NAMES.size() - 1)]
+    _current_alien_name = ALIEN_NAMES[randi_range(0, ALIEN_NAMES.size() - 1)]
     CHARACTER_DATA.reset_health()
     _shape_names = ShapeData.get_shape_names()
     _previous_viewport_size = get_viewport_rect().size
@@ -53,8 +60,8 @@ func _ready() -> void:
     add_child(_energy_label)
     _update_energy_label()
 
-    _player_health = CHARACTER_DATA.get_total_health("mech")
-    _enemy_health = CHARACTER_DATA.get_total_health("alien")
+    _player_health = CHARACTER_DATA.get_total_health(_current_mech_name)
+    _enemy_health = CHARACTER_DATA.get_total_health(_current_alien_name)
 
     _player_health_label = Label.new()
     add_child(_player_health_label)
@@ -68,22 +75,22 @@ func _ready() -> void:
 
     # Create sprite placeholders for the alien and mech behind the grids
     _alien_sprite = Sprite2D.new()
-    _alien_sprite.texture = CHARACTER_DATA.get_texture("alien")
+    _alien_sprite.texture = CHARACTER_DATA.get_texture(_current_alien_name)
     _alien_sprite.z_index = -1
     _alien_sprite.centered = false
     add_child(_alien_sprite)
 
-    _alien_grid_idx = CHARACTER_DATA.get_grid_index("alien")
+    _alien_grid_idx = CHARACTER_DATA.get_grid_index(_current_alien_name)
     if _alien_grid_idx < 0:
         _alien_grid_idx = 1
 
     _mech_sprite = Sprite2D.new()
-    _mech_sprite.texture = CHARACTER_DATA.get_texture("mech")
+    _mech_sprite.texture = CHARACTER_DATA.get_texture(_current_mech_name)
     _mech_sprite.z_index = -1
     _mech_sprite.centered = false
     add_child(_mech_sprite)
 
-    _mech_grid_idx = CHARACTER_DATA.get_grid_index("mech")
+    _mech_grid_idx = CHARACTER_DATA.get_grid_index(_current_mech_name)
     if _mech_grid_idx < 0:
         _mech_grid_idx = 0
 
@@ -168,10 +175,10 @@ func clear_previews() -> void:
 func _highlight_new_round() -> void:
     if _grids.size() < 2:
         return
-    var groups := CHARACTER_DATA.get_shape_groups("alien")
+    var groups := CHARACTER_DATA.get_shape_groups(_current_alien_name)
     var living: Array[String] = []
     for g in groups.keys():
-        if CHARACTER_DATA.get_group_health("alien", String(g)) > 0:
+        if CHARACTER_DATA.get_group_health(_current_alien_name, String(g)) > 0:
             living.append(String(g))
     if living.is_empty():
         _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
@@ -194,11 +201,11 @@ func _apply_danger_damage() -> void:
         if grid.cells[c.x][c.y]:
             continue
         var center := grid.to_global(Vector2((c.x + 0.5) * Grid.CELL_SIZE, (c.y + 0.5) * Grid.CELL_SIZE))
-        var group_name := CHARACTER_DATA.group_at_point("mech", _mech_sprite, center)
+        var group_name := CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, center)
         if group_name != "":
-            CHARACTER_DATA.damage_group("mech", group_name, 1)
+            CHARACTER_DATA.damage_group(_current_mech_name, group_name, 1)
             dmg += 1
-    _player_health = CHARACTER_DATA.get_total_health("mech")
+    _player_health = CHARACTER_DATA.get_total_health(_current_mech_name)
     _update_health_labels()
     grid.clear_highlights()
     _update_character_scale()
@@ -253,10 +260,10 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
         var blocks: Array[Vector2] = card.get_global_block_positions()
         for b in blocks:
             var center := b + Vector2(Grid.CELL_SIZE / 2.0, Grid.CELL_SIZE / 2.0)
-            var group_name := CHARACTER_DATA.group_at_point("alien", _alien_sprite, center)
+            var group_name := CHARACTER_DATA.group_at_point(_current_alien_name, _alien_sprite, center)
             if group_name != "":
-                CHARACTER_DATA.damage_group("alien", group_name, 1)
-        _enemy_health = CHARACTER_DATA.get_total_health("alien")
+                CHARACTER_DATA.damage_group(_current_alien_name, group_name, 1)
+        _enemy_health = CHARACTER_DATA.get_total_health(_current_alien_name)
     _update_health_labels()
     _update_character_scale()
 
@@ -264,8 +271,8 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
 func _update_character_scale() -> void:
     var grid_width: float = Grid.COLS * Grid.CELL_SIZE
     var grid_height: float = Grid.ROWS * Grid.CELL_SIZE * GRID_VERTICAL_SCALE
-    _update_sprite(_alien_sprite, "alien", grid_width, grid_height)
-    _update_sprite(_mech_sprite, "mech", grid_width, grid_height)
+    _update_sprite(_alien_sprite, _current_alien_name, grid_width, grid_height)
+    _update_sprite(_mech_sprite, _current_mech_name, grid_width, grid_height)
 
 func _update_sprite(sprite: Sprite2D, name: String, width: float, height: float) -> void:
     if sprite == null:
@@ -297,14 +304,14 @@ func _update_hover_label() -> void:
     if _hover_label == null:
         return
     var mouse_pos := get_global_mouse_position()
-    var group_name := CHARACTER_DATA.group_at_point("alien", _alien_sprite, mouse_pos)
+    var group_name := CHARACTER_DATA.group_at_point(_current_alien_name, _alien_sprite, mouse_pos)
     var char_name := ""
     if group_name != "":
-        char_name = "alien"
+        char_name = _current_alien_name
     else:
-        group_name = CHARACTER_DATA.group_at_point("mech", _mech_sprite, mouse_pos)
+        group_name = CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, mouse_pos)
         if group_name != "":
-            char_name = "mech"
+            char_name = _current_mech_name
     if group_name == "" or char_name == "":
         _hover_label.visible = false
         return
