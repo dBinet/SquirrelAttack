@@ -31,9 +31,10 @@ This repository contains a minimal Godot project for a simple 2D card game proto
 Damage from the player side only comes from these uncovered hazard squares
 that touch the mech.
 
-Body parts visibly change color based on remaining health. When a part drops
-below 50% of its maximum health it turns yellow, below 25% it turns red and
-at 0 health it becomes black and can no longer be targeted.
+Body parts visibly change color based on remaining health. After taking 25%
+damage a part turns yellow, after 50% damage it becomes orange, after 75%
+damage it turns red and at 0 health it becomes black and can no longer be
+targeted.
 
 The project is intentionally minimal and can be extended with gameplay and assets.
 Each grid now spans 20 columns, so both the player and enemy grids adjust their
