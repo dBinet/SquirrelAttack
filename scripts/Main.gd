@@ -10,9 +10,8 @@ var _enemy_health_label: Label
 var _hover_label: Label
 const ENERGY_PER_TURN := 3
 var _energy_available: int = ENERGY_PER_TURN
-const STARTING_HEALTH := 10
-var _player_health: int = STARTING_HEALTH
-var _enemy_health: int = STARTING_HEALTH
+var _player_health: int = 0
+var _enemy_health: int = 0
 const HAZARDS_PER_ROUND := 4
 
 # Sprite placeholders for an alien and a mech that appear behind the grids
@@ -52,6 +51,9 @@ func _ready() -> void:
     _energy_label.position = Vector2(120, 10)
     add_child(_energy_label)
     _update_energy_label()
+
+    _player_health = CHARACTER_DATA.get_total_health("mech")
+    _enemy_health = CHARACTER_DATA.get_total_health("alien")
 
     _player_health_label = Label.new()
     add_child(_player_health_label)
