@@ -184,7 +184,7 @@ func _highlight_new_round() -> void:
         _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
         return
     var chosen_part: String = living[randi_range(0, living.size() - 1)]
-    var attack: Array[Vector2i] = ATTACK_DATA.get_random_attack(chosen_part)
+    var attack: Array[Vector2i] = ATTACK_DATA.get_random_attack(chosen_part, _current_alien_name)
     if attack.is_empty():
         _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
     else:
