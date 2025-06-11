@@ -17,6 +17,7 @@ static var _bounds: Dictionary = {}
 static var _offsets: Dictionary = {}
 static var _top_left_offsets: Dictionary = {}
 static var _current_health: Dictionary = {}
+static var _max_health: Dictionary = {}
 static var _health_initialized := false
 
 static func _check_cell_size() -> void:
@@ -140,40 +141,53 @@ static func _extract_all_shapes(data: Variant) -> Array:
                                         result.append_array(_extract_all_shapes(v))
         return result
 
-static func _generate_texture(desc: Dictionary) -> ImageTexture:
+static func _generate_texture(name: String, desc: Dictionary) -> ImageTexture:
     var width := int(GRID.CELL_SIZE * GRID.COLS)
     var height := int(GRID.CELL_SIZE * GRID.ROWS)
     var cell := float(GRID.CELL_SIZE)
-
-    var shapes: Array = _extract_all_shapes(desc.get("shapes", []))
 
     var img := Image.create(width, height, false, Image.FORMAT_RGBA8)
     var base_col := _to_color(desc.get("base_color", [0, 0, 0, 0]))
     var outline_col := _get_outline_color(desc)
     img.fill(base_col)
-    for s in shapes:
-        var col := _to_color(s.get("color", [1, 1, 1, 1]))
-        match String(s.get("type", "")):
-            "circle":
-                var c_arr: Array = s.get("center", [0, 0])
-                var ctr := Vector2(float(c_arr[0]) * cell, float(c_arr[1]) * cell)
-                var rad := int(float(s.get("radius", 0)) * cell)
-                _draw_circle(img, ctr, rad, col)
-                _draw_circle_outline(img, ctr, rad, outline_col)
-            "rect":
-                var p_arr: Array = s.get("position", [0, 0])
-                var sz_arr: Array = s.get("size", [1, 1])
-                var pos := Vector2i(int(round(float(p_arr[0]) * cell)), int(round(float(p_arr[1]) * cell)))
-                var sz := Vector2i(int(round(float(sz_arr[0]) * cell)), int(round(float(sz_arr[1]) * cell)))
-                _draw_rect(img, pos, sz, col)
-                _draw_rect_outline(img, pos, sz, outline_col)
+
+    var groups := get_shape_groups(name)
+    for g in groups.keys():
+        var shapes: Array = groups[g]
+        var max_h := get_group_max_health(name, String(g))
+        var ratio := 1.0
+        if max_h > 0:
+            ratio = float(get_group_health(name, String(g))) / float(max_h)
+        for s in shapes:
+            var col := _to_color(s.get("color", [1, 1, 1, 1]))
+            if max_h > 0:
+                if ratio <= 0.0:
+                    col = Color.BLACK
+                elif ratio <= 0.25:
+                    col = Color.RED
+                elif ratio <= 0.5:
+                    col = Color(1, 1, 0)
+            match String(s.get("type", "")):
+                "circle":
+                    var c_arr: Array = s.get("center", [0, 0])
+                    var ctr := Vector2(float(c_arr[0]) * cell, float(c_arr[1]) * cell)
+                    var rad := int(float(s.get("radius", 0)) * cell)
+                    _draw_circle(img, ctr, rad, col)
+                    _draw_circle_outline(img, ctr, rad, outline_col)
+                "rect":
+                    var p_arr: Array = s.get("position", [0, 0])
+                    var sz_arr: Array = s.get("size", [1, 1])
+                    var pos := Vector2i(int(round(float(p_arr[0]) * cell)), int(round(float(p_arr[1]) * cell)))
+                    var sz := Vector2i(int(round(float(sz_arr[0]) * cell)), int(round(float(sz_arr[1]) * cell)))
+                    _draw_rect(img, pos, sz, col)
+                    _draw_rect_outline(img, pos, sz, outline_col)
     return ImageTexture.create_from_image(img)
 
 static func get_texture(name: String) -> ImageTexture:
     _load_data()
     _check_cell_size()
     if _characters.has(name):
-        return _generate_texture(_characters[name])
+        return _generate_texture(name, _characters[name])
     return ImageTexture.new()
 
 static func get_bounds(name: String) -> Vector2:
@@ -365,14 +379,19 @@ static func _initialize_health() -> void:
         for char_name in _characters.keys():
                 var groups = get_shape_groups(char_name)
                 var current: Dictionary = {}
+                var max_vals: Dictionary = {}
                 for g in groups.keys():
-                        current[g] = _calc_group_health(char_name, String(g))
+                        var max_h := _calc_group_health(char_name, String(g))
+                        current[g] = max_h
+                        max_vals[g] = max_h
                 _current_health[char_name] = current
+                _max_health[char_name] = max_vals
         _health_initialized = true
 
 static func reset_health() -> void:
         _health_initialized = false
         _current_health.clear()
+        _max_health.clear()
         _initialize_health()
 
 static func damage_group(name: String, group: String, amount: int) -> void:
@@ -390,6 +409,12 @@ static func get_group_health(name: String, group: String) -> int:
         _initialize_health()
         if _current_health.has(name) and _current_health[name].has(group):
                 return int(_current_health[name][group])
+        return 0
+
+static func get_group_max_health(name: String, group: String) -> int:
+        _initialize_health()
+        if _max_health.has(name) and _max_health[name].has(group):
+                return int(_max_health[name][group])
         return 0
 
 # Returns the sum of health values for all groups defined for a character.
