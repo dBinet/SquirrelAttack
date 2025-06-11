@@ -22,7 +22,7 @@ static func set_cell_size(new_size: float) -> void:
             if grid is Grid:
                 grid.queue_redraw()
 
-var cells: Array = []
+var cells: Array[Array[bool]] = []
 var preview_cells: Array[Vector2i] = []
 var danger_cells: Array[Vector2i] = []
 
@@ -57,9 +57,10 @@ func _get_piece_indices(card: Node) -> Array[Vector2i]:
 
 func _ready() -> void:
     for x in range(COLS):
-        cells.append([])
+        var row: Array[bool] = []
         for y in range(ROWS):
-            cells[x].append(false)
+            row.append(false)
+        cells.append(row)
     queue_redraw()
 
 func _draw() -> void:
