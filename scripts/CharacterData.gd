@@ -356,3 +356,16 @@ static func get_group_health(name: String, group: String) -> int:
                                         var r: float = float(s.get("radius", 0))
                                         health += int(PI * r * r)
         return health
+
+# Returns the sum of health values for all groups defined for a character.
+static func get_total_health(name: String) -> int:
+        _load_data()
+        if not _characters.has(name):
+                return 0
+        var shapes_dict = _characters[name].get("shapes")
+        if typeof(shapes_dict) != TYPE_DICTIONARY:
+                return 0
+        var total: int = 0
+        for g in shapes_dict.keys():
+                total += get_group_health(name, String(g))
+        return total

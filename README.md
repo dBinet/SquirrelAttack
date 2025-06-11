@@ -21,7 +21,8 @@ This repository contains a minimal Godot project for a simple 2D card game proto
 1. Open the folder in Godot 4.x.
 2. Run the project to see the empty scene. The left grid represents the player
    and the right grid is the enemy. Each side now displays a health counter
-   above its grid. At the start of each turn, one of the predefined attacks from
+   above its grid. The value shown is the sum of the health for every body part
+   defined in `data/characters.json`. At the start of each turn, one of the predefined attacks from
    `data/attacks.json` is chosen and those four squares on the player's grid
   light up. Any highlighted square left uncovered when the "End Turn" button is
   pressed only deals damage if that cell overlaps the mech sprite. Likewise,
