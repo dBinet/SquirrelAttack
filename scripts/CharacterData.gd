@@ -166,6 +166,8 @@ static func _generate_texture(name: String, desc: Dictionary) -> ImageTexture:
                 elif ratio <= 0.25:
                     col = Color.RED
                 elif ratio <= 0.5:
+                    col = Color(1, 0.5, 0)
+                elif ratio <= 0.75:
                     col = Color(1, 1, 0)
             match String(s.get("type", "")):
                 "circle":
