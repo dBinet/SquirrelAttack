@@ -193,6 +193,7 @@ func _apply_danger_damage() -> void:
     _player_health = CHARACTER_DATA.get_total_health("mech")
     _update_health_labels()
     grid.clear_highlights()
+    _update_character_scale()
 
 func _discard_remaining_cards() -> void:
     for card in _cards:
@@ -250,6 +251,7 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
                 CHARACTER_DATA.damage_group("alien", group_name, 1)
         _enemy_health = CHARACTER_DATA.get_total_health("alien")
     _update_health_labels()
+    _update_character_scale()
 
 
 func _update_character_scale() -> void:
@@ -340,6 +342,8 @@ func _group_at_point(name: String, desc: Dictionary, sprite: Sprite2D, point: Ve
     var tex_size := sprite.texture.get_size() * scale
     var top_left := sprite.global_position
     for g in groups.keys():
+        if CHARACTER_DATA.get_group_health(name, String(g)) <= 0:
+            continue
         var shapes: Array = groups[g]
         for s in shapes:
             if _point_in_shape(point, s, top_left, ratio, scale):

@@ -28,8 +28,12 @@ This repository contains a minimal Godot project for a simple 2D card game proto
   pressed only deals damage if that cell overlaps the mech sprite. Likewise,
   placing pieces on the enemy grid only harms the alien for each block that
   overlaps the alien sprite. Placing pieces outside the alien causes no damage.
-  Damage from the player side only comes from these uncovered hazard squares
-  that touch the mech.
+Damage from the player side only comes from these uncovered hazard squares
+that touch the mech.
+
+Body parts visibly change color based on remaining health. When a part drops
+below 50% of its maximum health it turns yellow, below 25% it turns red and
+at 0 health it becomes black and can no longer be targeted.
 
 The project is intentionally minimal and can be extended with gameplay and assets.
 Each grid now spans 20 columns, so both the player and enemy grids adjust their
