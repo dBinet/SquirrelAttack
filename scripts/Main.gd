@@ -34,6 +34,7 @@ var _shape_names: Array[String] = []
 
 func _ready() -> void:
     randomize()
+    CHARACTER_DATA.reset_health()
     _shape_names = ShapeData.get_shape_names()
     _previous_viewport_size = get_viewport_rect().size
     _grids = [get_node("LeftGrid"), get_node("RightGrid")]
@@ -176,14 +177,22 @@ func _highlight_new_round() -> void:
 func _apply_danger_damage() -> void:
     if _grids.size() < 2:
         return
-    var rect := Rect2()
-    if _mech_sprite and _mech_sprite.texture:
-        var tex_size := _mech_sprite.texture.get_size() * _mech_sprite.scale
-        rect = Rect2(_mech_sprite.global_position, tex_size)
-    var dmg := _grids[_mech_grid_idx].count_uncovered_highlights_in_rect(rect)
-    _player_health -= dmg
+    if _mech_sprite == null or _mech_sprite.texture == null:
+        return
+    var grid := _grids[_mech_grid_idx]
+    var desc := CHARACTER_DATA.get_description("mech")
+    var dmg := 0
+    for c in grid.danger_cells:
+        if grid.cells[c.x][c.y]:
+            continue
+        var center := grid.to_global(Vector2((c.x + 0.5) * Grid.CELL_SIZE, (c.y + 0.5) * Grid.CELL_SIZE))
+        var group_name := _group_at_point("mech", desc, _mech_sprite, center)
+        if group_name != "":
+            CHARACTER_DATA.damage_group("mech", group_name, 1)
+            dmg += 1
+    _player_health = CHARACTER_DATA.get_total_health("mech")
     _update_health_labels()
-    _grids[_mech_grid_idx].clear_highlights()
+    grid.clear_highlights()
 
 func _discard_remaining_cards() -> void:
     for card in _cards:
@@ -231,25 +240,15 @@ func _update_health_label_positions() -> void:
     _enemy_health_label.position = _grids[_alien_grid_idx].position + Vector2(grid_width / 2, -20)
 
 func _apply_damage(grid_idx: int, card: Card) -> void:
-    var dmg: int = 0
     if grid_idx == _alien_grid_idx and _alien_sprite and _alien_sprite.texture:
         var desc: Dictionary = CHARACTER_DATA.get_description("alien")
-        var shapes_data = desc.get("shapes", [])
-        var shapes: Array = []
-        if shapes_data is Array:
-            shapes = shapes_data
-        elif shapes_data is Dictionary:
-            shapes = CHARACTER_DATA._extract_all_shapes(shapes_data)
-        var ratio: float = float(Grid.CELL_SIZE)
-        var sprite_scale := Vector2(_alien_sprite.scale.x, _alien_sprite.scale.y)
-        var tex_size: Vector2 = _alien_sprite.texture.get_size() * sprite_scale
-        var sprite_top_left := _alien_sprite.global_position
         var blocks: Array[Vector2] = card.get_global_block_positions()
         for b in blocks:
-            var block_rect := Rect2(b, Vector2(Grid.CELL_SIZE, Grid.CELL_SIZE))
-            if _shapes_overlap_rect(shapes, sprite_top_left, ratio, sprite_scale, block_rect):
-                dmg += 1
-        _enemy_health -= dmg
+            var center := b + Vector2(Grid.CELL_SIZE / 2.0, Grid.CELL_SIZE / 2.0)
+            var group_name := _group_at_point("alien", desc, _alien_sprite, center)
+            if group_name != "":
+                CHARACTER_DATA.damage_group("alien", group_name, 1)
+        _enemy_health = CHARACTER_DATA.get_total_health("alien")
     _update_health_labels()
 
 
