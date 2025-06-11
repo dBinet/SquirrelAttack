@@ -7,7 +7,8 @@ This repository contains a minimal Godot project for a simple 2D card game proto
 - `scenes/` – Godot scene files including the main scene and a basic card scene.
 - `scripts/` – GDScript files for the main scene and card logic.
 - `data/shapes.json` – Available piece shapes and their energy costs.
-- `data/attacks.json` – Predefined 4-cell attack patterns used each turn.
+- `data/attacks.json` – Dictionary mapping body part names to arrays of
+  4-cell attack patterns.
  - `data/characters.json` – Simple pixel art descriptions for the alien and mech.
   Shapes may be grouped under named keys (for example `"left_arm"`) inside the
   `shapes` dictionary. Each group now stores a `health` value equal to the number
@@ -22,9 +23,10 @@ This repository contains a minimal Godot project for a simple 2D card game proto
 2. Run the project to see the empty scene. The left grid represents the player
    and the right grid is the enemy. Each side now displays a health counter
    above its grid. The value shown is the sum of the health for every body part
-   defined in `data/characters.json`. At the start of each turn, one of the predefined attacks from
-   `data/attacks.json` is chosen and those four squares on the player's grid
-  light up. Any highlighted square left uncovered when the "End Turn" button is
+  defined in `data/characters.json`. At the start of each turn, a living body
+  part on the alien is randomly selected and one of that part's attack patterns
+  from `data/attacks.json` is highlighted on the player's grid. Any highlighted
+  square left uncovered when the "End Turn" button is
   pressed only deals damage if that cell overlaps the mech sprite. Likewise,
   placing pieces on the enemy grid only harms the alien for each block that
   overlaps the alien sprite. Placing pieces outside the alien causes no damage.

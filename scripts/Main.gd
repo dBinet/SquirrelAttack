@@ -168,7 +168,16 @@ func clear_previews() -> void:
 func _highlight_new_round() -> void:
     if _grids.size() < 2:
         return
-    var attack: Array[Vector2i] = ATTACK_DATA.get_random_attack()
+    var groups := CHARACTER_DATA.get_shape_groups("alien")
+    var living: Array[String] = []
+    for g in groups.keys():
+        if CHARACTER_DATA.get_group_health("alien", String(g)) > 0:
+            living.append(String(g))
+    if living.is_empty():
+        _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
+        return
+    var chosen_part: String = living[randi_range(0, living.size() - 1)]
+    var attack: Array[Vector2i] = ATTACK_DATA.get_random_attack(chosen_part)
     if attack.is_empty():
         _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
     else:
