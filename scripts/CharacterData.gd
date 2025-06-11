@@ -16,6 +16,8 @@ static var _loaded := false
 static var _bounds: Dictionary = {}
 static var _offsets: Dictionary = {}
 static var _top_left_offsets: Dictionary = {}
+static var _current_health: Dictionary = {}
+static var _health_initialized := false
 
 static func _check_cell_size() -> void:
     if _last_cell_size != GRID.CELL_SIZE:
@@ -323,8 +325,7 @@ static func get_shape_groups(name: String) -> Dictionary:
 # Returns the health value for a specific group of a character. If the group
 # defines a "health" key, that value is returned. Otherwise the health is
 # calculated as the total number of squares described by the group's shapes.
-static func get_group_health(name: String, group: String) -> int:
-        _load_data()
+static func _calc_group_health(name: String, group: String) -> int:
         if not _characters.has(name):
                 return 0
         var shapes_dict = _characters[name].get("shapes")
@@ -357,15 +358,46 @@ static func get_group_health(name: String, group: String) -> int:
                                         health += int(PI * r * r)
         return health
 
+static func _initialize_health() -> void:
+        _load_data()
+        if _health_initialized:
+                return
+        for char_name in _characters.keys():
+                var groups = get_shape_groups(char_name)
+                var current: Dictionary = {}
+                for g in groups.keys():
+                        current[g] = _calc_group_health(char_name, String(g))
+                _current_health[char_name] = current
+        _health_initialized = true
+
+static func reset_health() -> void:
+        _health_initialized = false
+        _current_health.clear()
+        _initialize_health()
+
+static func damage_group(name: String, group: String, amount: int) -> void:
+        _initialize_health()
+        if not _current_health.has(name):
+                return
+        var groups: Dictionary = _current_health[name]
+        if not groups.has(group):
+                return
+        var remaining: int = max(int(groups[group]) - amount, 0)
+        groups[group] = remaining
+        _current_health[name] = groups
+
+static func get_group_health(name: String, group: String) -> int:
+        _initialize_health()
+        if _current_health.has(name) and _current_health[name].has(group):
+                return int(_current_health[name][group])
+        return 0
+
 # Returns the sum of health values for all groups defined for a character.
 static func get_total_health(name: String) -> int:
-        _load_data()
-        if not _characters.has(name):
-                return 0
-        var shapes_dict = _characters[name].get("shapes")
-        if typeof(shapes_dict) != TYPE_DICTIONARY:
+        _initialize_health()
+        if not _current_health.has(name):
                 return 0
         var total: int = 0
-        for g in shapes_dict.keys():
-                total += get_group_health(name, String(g))
+        for v in _current_health[name].values():
+                total += int(v)
         return total
