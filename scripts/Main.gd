@@ -232,7 +232,12 @@ func _apply_damage(grid_idx: int, card: Card) -> void:
     var dmg: int = 0
     if grid_idx == _alien_grid_idx and _alien_sprite and _alien_sprite.texture:
         var desc: Dictionary = CHARACTER_DATA.get_description("alien")
-        var shapes: Array = desc.get("shapes", [])
+        var shapes_data = desc.get("shapes", [])
+        var shapes: Array = []
+        if shapes_data is Array:
+            shapes = shapes_data
+        elif shapes_data is Dictionary:
+            shapes = CHARACTER_DATA._extract_all_shapes(shapes_data)
         var ratio: float = float(Grid.CELL_SIZE)
         var sprite_scale := Vector2(_alien_sprite.scale.x, _alien_sprite.scale.y)
         var tex_size: Vector2 = _alien_sprite.texture.get_size() * sprite_scale
