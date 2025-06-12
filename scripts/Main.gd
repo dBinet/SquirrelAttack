@@ -183,12 +183,37 @@ func _highlight_new_round() -> void:
     if living.is_empty():
         _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
         return
-    var chosen_part: String = living[randi_range(0, living.size() - 1)]
-    var attack: Array[Vector2i] = ATTACK_DATA.get_random_attack(chosen_part, _current_alien_name)
-    if attack.is_empty():
+
+    living.shuffle()
+    var num_parts := min(3, living.size())
+    var highlight_cells: Array[Vector2i] = []
+    for i in range(num_parts):
+        var part := living[i]
+        var attacks: Array = ATTACK_DATA.get_attacks_for_part(part, _current_alien_name)
+        if attacks.is_empty():
+            continue
+        var best_idx := 0
+        var best_score := -1
+        for j in range(attacks.size()):
+            var pat: Array[Vector2i] = attacks[j]
+            var score := 0
+            for cell in pat:
+                var center := _grids[_mech_grid_idx].to_global(Vector2((cell.x + 0.5) * Grid.CELL_SIZE, (cell.y + 0.5) * Grid.CELL_SIZE))
+                var gname := CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, center)
+                if gname != "" and CHARACTER_DATA.get_group_health(_current_mech_name, gname) > 0:
+                    score += 1
+            if score > best_score:
+                best_score = score
+                best_idx = j
+        var chosen_attack: Array[Vector2i] = attacks[best_idx]
+        for c in chosen_attack:
+            if not highlight_cells.has(c):
+                highlight_cells.append(c)
+
+    if highlight_cells.is_empty():
         _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
     else:
-        _grids[_mech_grid_idx].highlight_attack(attack)
+        _grids[_mech_grid_idx].highlight_attack(highlight_cells)
 
 func _apply_danger_damage() -> void:
     if _grids.size() < 2:
