@@ -8,6 +8,7 @@ var _energy_label: Label
 var _player_health_label: Label
 var _enemy_health_label: Label
 var _hover_label: Label
+var _attack_label: Label
 const ENERGY_PER_TURN := 3
 var _energy_available: int = ENERGY_PER_TURN
 var _player_health: int = 0
@@ -73,6 +74,12 @@ func _ready() -> void:
     _hover_label.visible = false
     add_child(_hover_label)
 
+    _attack_label = Label.new()
+    _attack_label.custom_minimum_size = Vector2(150, 20)
+    _attack_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+    add_child(_attack_label)
+    _update_attack_label_position()
+
     # Create sprite placeholders for the alien and mech behind the grids
     _alien_sprite = Sprite2D.new()
     _alien_sprite.texture = CHARACTER_DATA.get_texture(_current_alien_name)
@@ -108,6 +115,7 @@ func _process(delta: float) -> void:
         _update_scale()
         _update_card_positions()
         _position_grids()
+        _update_attack_label_position()
 
     _update_hover_label()
 
@@ -136,6 +144,7 @@ func _position_grids() -> void:
     _grids[1].position = Vector2(start_x + grid_width + GRID_MARGIN, top_y)
     _update_health_label_positions()
     _update_creature_positions()
+    _update_attack_label_position()
 
 func _update_scale() -> void:
     var viewport_size := _previous_viewport_size
@@ -146,6 +155,7 @@ func _update_scale() -> void:
     Grid.set_cell_size(new_size)
     Card.update_scale(new_size)
     _update_character_scale()
+    _update_attack_label_position()
 
 func on_card_dropped(card: Card) -> bool:
     if _energy_available < card.energy_cost:
@@ -182,49 +192,47 @@ func _highlight_new_round() -> void:
             living.append(String(g))
     if living.is_empty():
         _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
+        if _attack_label:
+            _attack_label.text = ""
         return
 
-    living.shuffle()
-    var num_parts: int = min(3, living.size())
-    var highlight_cells: Array[Vector2i] = []
-    for i in range(num_parts):
-        var part := living[i]
-        var shapes: Array = ATTACK_DATA.get_shapes_for_part(part, _current_alien_name)
-        if shapes.is_empty():
-            continue
-        var best_cells: Array[Vector2i] = []
-        var best_score := -1
-        for s in shapes:
-            if typeof(s) != TYPE_STRING:
-                continue
-            var blocks: Array[Vector2] = ShapeData.get_blocks(String(s))
-            if blocks.is_empty():
-                continue
-            var bounds := _get_shape_bounds(blocks)
-            for x in range(Grid.COLS - int(bounds.size.x) + 1):
-                for y in range(Grid.ROWS - int(bounds.size.y) + 1):
-                    var cells: Array[Vector2i] = []
-                    for b in blocks:
-                        var cx := int(b.x - int(bounds.position.x) + x)
-                        var cy := int(b.y - int(bounds.position.y) + y)
-                        cells.append(Vector2i(cx, cy))
-                    var score := 0
-                    for c in cells:
-                        var center := _grids[_mech_grid_idx].to_global(Vector2((c.x + 0.5) * Grid.CELL_SIZE, (c.y + 0.5) * Grid.CELL_SIZE))
-                        var gname := CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, center)
-                        if gname == part and CHARACTER_DATA.get_group_health(_current_mech_name, gname) > 0:
-                            score += 1
-                    if score > best_score:
-                        best_score = score
-                        best_cells = cells
-        for c in best_cells:
-            if not highlight_cells.has(c):
-                highlight_cells.append(c)
-
-    if highlight_cells.is_empty():
+    var part := living[randi_range(0, living.size() - 1)]
+    var shapes: Array = ATTACK_DATA.get_shapes_for_part(part, _current_alien_name)
+    if shapes.is_empty():
+        _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
+        if _attack_label:
+            _attack_label.text = part
+        return
+    var shape_name := String(shapes[randi_range(0, shapes.size() - 1)])
+    if _attack_label:
+        _attack_label.text = "%s - %s" % [part, shape_name]
+    var blocks: Array[Vector2] = ShapeData.get_blocks(shape_name)
+    if blocks.is_empty():
+        _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
+        return
+    var bounds := _get_shape_bounds(blocks)
+    var best_cells: Array[Vector2i] = []
+    var best_score := -1
+    for x in range(Grid.COLS - int(bounds.size.x) + 1):
+        for y in range(Grid.ROWS - int(bounds.size.y) + 1):
+            var cells: Array[Vector2i] = []
+            for b in blocks:
+                var cx := int(b.x - int(bounds.position.x) + x)
+                var cy := int(b.y - int(bounds.position.y) + y)
+                cells.append(Vector2i(cx, cy))
+            var score := 0
+            for c in cells:
+                var center := _grids[_mech_grid_idx].to_global(Vector2((c.x + 0.5) * Grid.CELL_SIZE, (c.y + 0.5) * Grid.CELL_SIZE))
+                var gname := CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, center)
+                if gname == part and CHARACTER_DATA.get_group_health(_current_mech_name, gname) > 0:
+                    score += 1
+            if score > best_score:
+                best_score = score
+                best_cells = cells
+    if best_cells.is_empty():
         _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
     else:
-        _grids[_mech_grid_idx].highlight_attack(highlight_cells)
+        _grids[_mech_grid_idx].highlight_attack(best_cells)
 
 func _apply_danger_damage() -> void:
     if _grids.size() < 2:
@@ -290,6 +298,12 @@ func _update_health_label_positions() -> void:
     var grid_width := Grid.COLS * Grid.CELL_SIZE
     _player_health_label.position = _grids[_mech_grid_idx].position + Vector2(grid_width / 2, -20)
     _enemy_health_label.position = _grids[_alien_grid_idx].position + Vector2(grid_width / 2, -20)
+
+func _update_attack_label_position() -> void:
+    if _attack_label == null:
+        return
+    var viewport_size := _previous_viewport_size
+    _attack_label.position = Vector2(viewport_size.x - 160, 10)
 
 func _apply_damage(grid_idx: int, card: Card) -> void:
     if grid_idx == _alien_grid_idx and _alien_sprite and _alien_sprite.texture:
