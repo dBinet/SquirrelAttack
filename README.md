@@ -24,10 +24,10 @@ This repository contains a minimal Godot project for a simple 2D card game proto
 2. Run the project to see the empty scene. The left grid represents the player
    and the right grid is the enemy. Each side now displays a health counter
    above its grid. The value shown is the sum of the health for every body part
-  defined in `data/characters.json`. At the start of each turn, a living body
-  part on the alien is randomly selected and one of that part's attack shapes
-  from `data/attacks.json` is positioned on the player's grid to maximize damage
-  to the matching body part. Any highlighted
+   defined in `data/characters.json`. At the start of each turn, the enemy picks
+   one of its living body parts and selects an attack shape. After choosing the
+   shape, it targets a body part on the mech and positions the shape on the
+   player's grid to cover as much of that part as possible. Any highlighted
   square left uncovered when the "End Turn" button is
   pressed only deals damage if that cell overlaps the mech sprite. Likewise,
   placing pieces on the enemy grid only harms the alien for each block that
