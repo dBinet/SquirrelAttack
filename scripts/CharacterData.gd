@@ -439,6 +439,7 @@ static func reset_health() -> void:
         _health_initialized = false
         _current_health.clear()
         _max_health.clear()
+        _textures.clear()
         _initialize_health()
 
 static func damage_group(name: String, group: String, amount: int) -> void:
@@ -451,6 +452,7 @@ static func damage_group(name: String, group: String, amount: int) -> void:
         var remaining: int = max(int(groups[group]) - amount, 0)
         groups[group] = remaining
         _current_health[name] = groups
+        _textures.erase(name)
 
 static func get_group_health(name: String, group: String) -> int:
         _initialize_health()
