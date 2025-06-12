@@ -425,35 +425,28 @@ func _compute_attack(part: String) -> Dictionary:
     if mech_living.is_empty():
         return result
 
+    var target_part := mech_living[randi_range(0, mech_living.size() - 1)]
     var best_cells: Array[Vector2i] = []
     var best_score := -1
-    var best_part := ""
-    for target in mech_living:
-        var local_best_cells: Array[Vector2i] = []
-        var local_best := -1
-        for x in range(Grid.COLS - int(bounds.size.x) + 1):
-            for y in range(Grid.ROWS - int(bounds.size.y) + 1):
-                var cells: Array[Vector2i] = []
-                for b in blocks:
-                    var cx := int(b.x - int(bounds.position.x) + x)
-                    var cy := int(b.y - int(bounds.position.y) + y)
-                    cells.append(Vector2i(cx, cy))
-                var score := 0
-                for c in cells:
-                    var center := _grids[_mech_grid_idx].to_global(Vector2((c.x + 0.5) * Grid.CELL_SIZE, (c.y + 0.5) * Grid.CELL_SIZE))
-                    var gname := CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, center)
-                    if gname == target and CHARACTER_DATA.get_group_health(_current_mech_name, gname) > 0:
-                        score += 1
-                if score > local_best:
-                    local_best = score
-                    local_best_cells = cells
-        if local_best > best_score:
-            best_score = local_best
-            best_cells = local_best_cells
-            best_part = target
+    for x in range(Grid.COLS - int(bounds.size.x) + 1):
+        for y in range(Grid.ROWS - int(bounds.size.y) + 1):
+            var cells: Array[Vector2i] = []
+            for b in blocks:
+                var cx := int(b.x - int(bounds.position.x) + x)
+                var cy := int(b.y - int(bounds.position.y) + y)
+                cells.append(Vector2i(cx, cy))
+            var score := 0
+            for c in cells:
+                var center := _grids[_mech_grid_idx].to_global(Vector2((c.x + 0.5) * Grid.CELL_SIZE, (c.y + 0.5) * Grid.CELL_SIZE))
+                var gname := CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, center)
+                if gname == target_part and CHARACTER_DATA.get_group_health(_current_mech_name, gname) > 0:
+                    score += 1
+            if score > best_score:
+                best_score = score
+                best_cells = cells
 
     result["cells"] = best_cells
     result["shape"] = shape_name
-    result["target"] = best_part
+    result["target"] = target_part
     return result
 
