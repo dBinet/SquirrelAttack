@@ -4,8 +4,8 @@ class_name AttackData
 const ATTACKS_FILE := "res://data/attacks.json"
 const DATA_UTILS := preload("res://scripts/DataUtils.gd")
 
-# Stores attack patterns keyed by character name then body part
-# each entry is an array of 4-cell pattern arrays
+# Stores attack shapes keyed by character name then body part
+# each entry is an array of shape name strings
 static var _attacks: Dictionary = {}
 static var _loaded: bool = false
 
@@ -28,38 +28,28 @@ static func _load_data() -> void:
             var char_map: Dictionary = {}
             for part in char_val.keys():
                 var arr: Array = char_val[part]
-                var patterns: Array = []
+                var shapes: Array[String] = []
                 if arr is Array:
-                    for attack in arr:
-                        if attack is Array:
-                            var cells: Array[Vector2i] = []
-                            for c in attack:
-                                if c is Array:
-                                    cells.append(DATA_UTILS.array_to_vector2i(c))
-                            if cells.size() == 4:
-                                patterns.append(cells)
-                char_map[part] = patterns
+                    for s in arr:
+                        if typeof(s) == TYPE_STRING:
+                            shapes.append(String(s))
+                char_map[part] = shapes
             _attacks[char_key] = char_map
         elif char_val is Array:
-            # Support legacy format storing patterns directly under the part name
-            var patterns: Array = []
-            for attack in char_val:
-                if attack is Array:
-                    var cells: Array[Vector2i] = []
-                    for c in attack:
-                        if c is Array:
-                            cells.append(DATA_UTILS.array_to_vector2i(c))
-                    if cells.size() == 4:
-                        patterns.append(cells)
+            # Support legacy format storing shapes directly under the part name
+            var shapes: Array[String] = []
+            for s in char_val:
+                if typeof(s) == TYPE_STRING:
+                    shapes.append(String(s))
             if not _attacks.has("default"):
                 _attacks["default"] = {}
-            _attacks["default"][char_key] = patterns
+            _attacks["default"][char_key] = shapes
 
 static func get_attacks() -> Dictionary:
     _load_data()
     return _attacks.duplicate()
 
-static func get_attacks_for_part(part: String, char_name: String = "") -> Array:
+static func get_shapes_for_part(part: String, char_name: String = "") -> Array:
     _load_data()
     if char_name != "" and _attacks.has(char_name):
         var char_map: Dictionary = _attacks[char_name]
@@ -69,8 +59,8 @@ static func get_attacks_for_part(part: String, char_name: String = "") -> Array:
         return _attacks["default"][part].duplicate()
     return []
 
-static func get_random_attack(part: String, char_name: String = "") -> Array[Vector2i]:
-    var patterns: Array = get_attacks_for_part(part, char_name)
-    if patterns.is_empty():
-        return []
-    return patterns[randi_range(0, patterns.size() - 1)].duplicate()
+static func get_random_shape(part: String, char_name: String = "") -> String:
+    var shapes: Array = get_shapes_for_part(part, char_name)
+    if shapes.is_empty():
+        return ""
+    return shapes[randi_range(0, shapes.size() - 1)]

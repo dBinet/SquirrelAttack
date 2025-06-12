@@ -189,24 +189,35 @@ func _highlight_new_round() -> void:
     var highlight_cells: Array[Vector2i] = []
     for i in range(num_parts):
         var part := living[i]
-        var attacks: Array = ATTACK_DATA.get_attacks_for_part(part, _current_alien_name)
-        if attacks.is_empty():
+        var shapes: Array = ATTACK_DATA.get_shapes_for_part(part, _current_alien_name)
+        if shapes.is_empty():
             continue
-        var best_idx := 0
+        var best_cells: Array[Vector2i] = []
         var best_score := -1
-        for j in range(attacks.size()):
-            var pat: Array[Vector2i] = attacks[j]
-            var score := 0
-            for cell in pat:
-                var center := _grids[_mech_grid_idx].to_global(Vector2((cell.x + 0.5) * Grid.CELL_SIZE, (cell.y + 0.5) * Grid.CELL_SIZE))
-                var gname := CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, center)
-                if gname != "" and CHARACTER_DATA.get_group_health(_current_mech_name, gname) > 0:
-                    score += 1
-            if score > best_score:
-                best_score = score
-                best_idx = j
-        var chosen_attack: Array[Vector2i] = attacks[best_idx]
-        for c in chosen_attack:
+        for s in shapes:
+            if typeof(s) != TYPE_STRING:
+                continue
+            var blocks: Array[Vector2] = ShapeData.get_blocks(String(s))
+            if blocks.is_empty():
+                continue
+            var bounds := _get_shape_bounds(blocks)
+            for x in range(Grid.COLS - int(bounds.size.x) + 1):
+                for y in range(Grid.ROWS - int(bounds.size.y) + 1):
+                    var cells: Array[Vector2i] = []
+                    for b in blocks:
+                        var cx := int(b.x - int(bounds.position.x) + x)
+                        var cy := int(b.y - int(bounds.position.y) + y)
+                        cells.append(Vector2i(cx, cy))
+                    var score := 0
+                    for c in cells:
+                        var center := _grids[_mech_grid_idx].to_global(Vector2((c.x + 0.5) * Grid.CELL_SIZE, (c.y + 0.5) * Grid.CELL_SIZE))
+                        var gname := CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, center)
+                        if gname == part and CHARACTER_DATA.get_group_health(_current_mech_name, gname) > 0:
+                            score += 1
+                    if score > best_score:
+                        best_score = score
+                        best_cells = cells
+        for c in best_cells:
             if not highlight_cells.has(c):
                 highlight_cells.append(c)
 
@@ -344,4 +355,20 @@ func _update_hover_label() -> void:
     _hover_label.text = group_name + " (" + str(health) + ")"
     _hover_label.position = mouse_pos + Vector2(10, 10)
     _hover_label.visible = true
+
+# Helper used when positioning enemy attack shapes. Returns the bounding
+# rectangle of the given block coordinates.
+func _get_shape_bounds(blocks: Array[Vector2]) -> Rect2:
+    if blocks.is_empty():
+        return Rect2()
+    var min_x := blocks[0].x
+    var max_x := blocks[0].x
+    var min_y := blocks[0].y
+    var max_y := blocks[0].y
+    for b in blocks:
+        min_x = min(min_x, b.x)
+        max_x = max(max_x, b.x)
+        min_y = min(min_y, b.y)
+        max_y = max(max_y, b.y)
+    return Rect2(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
 
