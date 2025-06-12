@@ -82,7 +82,7 @@ func _ready() -> void:
     _update_attack_label_position()
 
     _target_label = Label.new()
-    _target_label.custom_minimum_size = Vector2(150, 20)
+    _target_label.custom_minimum_size = Vector2(150, 40)
     add_child(_target_label)
     _update_target_label_position()
 
@@ -209,6 +209,7 @@ func _highlight_new_round() -> void:
 
     var text_lines: Array[String] = []
     var attack_cells: Array[Vector2i] = []
+    var target_lines: Array[String] = []
 
     var part := living[randi_range(0, living.size() - 1)]
     living.erase(part)
@@ -216,12 +217,10 @@ func _highlight_new_round() -> void:
     if atk1.shape != "":
         text_lines.append("%s - %s" % [part, atk1.shape])
         attack_cells.append_array(atk1.cells)
-        if _target_label:
-            _target_label.text = atk1.target
+        if atk1.target != "":
+            target_lines.append(atk1.target)
     else:
         text_lines.append(part)
-        if _target_label:
-            _target_label.text = ""
 
     if not living.is_empty():
         var part2 := living[randi_range(0, living.size() - 1)]
@@ -229,8 +228,13 @@ func _highlight_new_round() -> void:
         if atk2.shape != "":
             text_lines.append("%s - %s" % [part2, atk2.shape])
             attack_cells.append_array(atk2.cells)
+            if atk2.target != "":
+                target_lines.append(atk2.target)
         else:
             text_lines.append(part2)
+
+    if _target_label:
+        _target_label.text = "\n".join(target_lines)
 
     if attack_cells.is_empty():
         _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
