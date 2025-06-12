@@ -185,7 +185,7 @@ func _highlight_new_round() -> void:
         return
 
     living.shuffle()
-    var num_parts := min(3, living.size())
+    var num_parts: int = min(3, living.size())
     var highlight_cells: Array[Vector2i] = []
     for i in range(num_parts):
         var part := living[i]
