@@ -76,7 +76,7 @@ func _ready() -> void:
     add_child(_hover_label)
 
     _attack_label = Label.new()
-    _attack_label.custom_minimum_size = Vector2(150, 20)
+    _attack_label.custom_minimum_size = Vector2(150, 40)
     _attack_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
     add_child(_attack_label)
     _update_attack_label_position()
@@ -207,70 +207,37 @@ func _highlight_new_round() -> void:
             _target_label.text = ""
         return
 
+    var text_lines: Array[String] = []
+    var attack_cells: Array[Vector2i] = []
+
     var part := living[randi_range(0, living.size() - 1)]
-    var shapes: Array = ATTACK_DATA.get_shapes_for_part(part, _current_alien_name)
-    if shapes.is_empty():
-        _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
-        if _attack_label:
-            _attack_label.text = part
+    living.erase(part)
+    var atk1 := _compute_attack(part)
+    if atk1.shape != "":
+        text_lines.append("%s - %s" % [part, atk1.shape])
+        attack_cells.append_array(atk1.cells)
+        if _target_label:
+            _target_label.text = atk1.target
+    else:
+        text_lines.append(part)
         if _target_label:
             _target_label.text = ""
-        return
-    var shape_name := String(shapes[randi_range(0, shapes.size() - 1)])
-    if _attack_label:
-        _attack_label.text = "%s - %s" % [part, shape_name]
-    var blocks: Array[Vector2] = ShapeData.get_blocks(shape_name)
-    if blocks.is_empty():
-        _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
-        if _target_label:
-            _target_label.text = ""
-        return
-    var bounds := _get_shape_bounds(blocks)
 
-    var mech_groups := CHARACTER_DATA.get_shape_groups(_current_mech_name)
-    var mech_living: Array[String] = []
-    for g in mech_groups.keys():
-        if CHARACTER_DATA.get_group_health(_current_mech_name, String(g)) > 0:
-            mech_living.append(String(g))
-    if mech_living.is_empty():
-        _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
-        if _target_label:
-            _target_label.text = ""
-        return
+    if not living.is_empty():
+        var part2 := living[randi_range(0, living.size() - 1)]
+        var atk2 := _compute_attack(part2)
+        if atk2.shape != "":
+            text_lines.append("%s - %s" % [part2, atk2.shape])
+            attack_cells.append_array(atk2.cells)
+        else:
+            text_lines.append(part2)
 
-    var best_cells: Array[Vector2i] = []
-    var best_score := -1
-    var best_part := ""
-    for target in mech_living:
-        var local_best_cells: Array[Vector2i] = []
-        var local_best := -1
-        for x in range(Grid.COLS - int(bounds.size.x) + 1):
-            for y in range(Grid.ROWS - int(bounds.size.y) + 1):
-                var cells: Array[Vector2i] = []
-                for b in blocks:
-                    var cx := int(b.x - int(bounds.position.x) + x)
-                    var cy := int(b.y - int(bounds.position.y) + y)
-                    cells.append(Vector2i(cx, cy))
-                var score := 0
-                for c in cells:
-                    var center := _grids[_mech_grid_idx].to_global(Vector2((c.x + 0.5) * Grid.CELL_SIZE, (c.y + 0.5) * Grid.CELL_SIZE))
-                    var gname := CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, center)
-                    if gname == target and CHARACTER_DATA.get_group_health(_current_mech_name, gname) > 0:
-                        score += 1
-                if score > local_best:
-                    local_best = score
-                    local_best_cells = cells
-        if local_best > best_score:
-            best_score = local_best
-            best_cells = local_best_cells
-            best_part = target
-
-    if best_cells.is_empty():
+    if attack_cells.is_empty():
         _grids[_mech_grid_idx].highlight_random_cells(HAZARDS_PER_ROUND)
     else:
-        _grids[_mech_grid_idx].highlight_attack(best_cells)
-    if _target_label:
-        _target_label.text = best_part
+        _grids[_mech_grid_idx].highlight_attack(attack_cells)
+    if _attack_label:
+        _attack_label.text = "\n".join(text_lines)
 
 func _apply_danger_damage() -> void:
     if _grids.size() < 2:
@@ -429,4 +396,60 @@ func _get_shape_bounds(blocks: Array[Vector2]) -> Rect2:
         min_y = min(min_y, b.y)
         max_y = max(max_y, b.y)
     return Rect2(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
+
+# Calculates the best attack for the given alien body part. Returns a
+# dictionary with keys:
+#   "cells"  -> Array of Vector2i positions to highlight on the mech grid
+#   "shape"  -> Name of the attack shape
+#   "target" -> Name of the mech body part being targeted
+func _compute_attack(part: String) -> Dictionary:
+    var result := {"cells": [], "shape": "", "target": ""}
+    var shapes: Array = ATTACK_DATA.get_shapes_for_part(part, _current_alien_name)
+    if shapes.is_empty():
+        return result
+    var shape_name := String(shapes[randi_range(0, shapes.size() - 1)])
+    var blocks: Array[Vector2] = ShapeData.get_blocks(shape_name)
+    if blocks.is_empty():
+        return result
+    var bounds := _get_shape_bounds(blocks)
+
+    var mech_groups := CHARACTER_DATA.get_shape_groups(_current_mech_name)
+    var mech_living: Array[String] = []
+    for g in mech_groups.keys():
+        if CHARACTER_DATA.get_group_health(_current_mech_name, String(g)) > 0:
+            mech_living.append(String(g))
+    if mech_living.is_empty():
+        return result
+
+    var best_cells: Array[Vector2i] = []
+    var best_score := -1
+    var best_part := ""
+    for target in mech_living:
+        var local_best_cells: Array[Vector2i] = []
+        var local_best := -1
+        for x in range(Grid.COLS - int(bounds.size.x) + 1):
+            for y in range(Grid.ROWS - int(bounds.size.y) + 1):
+                var cells: Array[Vector2i] = []
+                for b in blocks:
+                    var cx := int(b.x - int(bounds.position.x) + x)
+                    var cy := int(b.y - int(bounds.position.y) + y)
+                    cells.append(Vector2i(cx, cy))
+                var score := 0
+                for c in cells:
+                    var center := _grids[_mech_grid_idx].to_global(Vector2((c.x + 0.5) * Grid.CELL_SIZE, (c.y + 0.5) * Grid.CELL_SIZE))
+                    var gname := CHARACTER_DATA.group_at_point(_current_mech_name, _mech_sprite, center)
+                    if gname == target and CHARACTER_DATA.get_group_health(_current_mech_name, gname) > 0:
+                        score += 1
+                if score > local_best:
+                    local_best = score
+                    local_best_cells = cells
+        if local_best > best_score:
+            best_score = local_best
+            best_cells = local_best_cells
+            best_part = target
+
+    result["cells"] = best_cells
+    result["shape"] = shape_name
+    result["target"] = best_part
+    return result
 
